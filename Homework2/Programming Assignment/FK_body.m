@@ -5,10 +5,7 @@ function T = FK_body(home_config, screw_list, theta_list)      % inputs are the 
 
     p_sb = home_config(1:3, 4);  % translation vector of b from s
     % translation vector of b from s under the se(3) form
-    p_sb_skew = [
-                0, -p_sb(3), p_sb(2);
-                p_sb(3), 0, -p_sb(1);
-                -p_sb(2), p_sb(1), 0];
+    p_sb_skew = v2skew(p_sb');
 
     %adjacent matrix of inverse of home_config (M)
     adj_M_inv = [

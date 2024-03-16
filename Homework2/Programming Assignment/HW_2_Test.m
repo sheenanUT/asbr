@@ -47,11 +47,11 @@ qs6 = [0; 0; -L4];
 qs_list = [qs1, qs2, qs3, qs4, qs5, qs6];
 
 % Screw axis position vectors, body frame
-qb1 = [-L5-L3-L2; 0; 0];
-qb2 = [-L5-L3; 0; L4];
-qb3 = [-L5; 0; L4];
-qb4 = [0; 0; 0];
-qb5 = [0; 0; 0];
+qb1 = [-L6-L5-L3-L2; 0; 0];
+qb2 = [-L6-L5-L3; 0; L4];
+qb3 = [-L6-L5; 0; L4];
+qb4 = [-L6; 0; 0];
+qb5 = [-L6; 0; 0];
 qb6 = [0; 0; 0];
 qb_list = [qb1, qb2, qb3, qb4, qb5, qb6];
 
@@ -61,8 +61,8 @@ vb_list = [];
 % Loop to compute cross products and add them to v_list
 for i = 1:length(w_list)
     % Compute the cross products
-    vs = cross(w_list(:, i), qs_list(:, i));
-    vb = cross(w_list(:, i), qb_list(:, i));
+    vs = cross(-w_list(:, i), qs_list(:, i));
+    vb = cross(-w_list(:, i), qb_list(:, i));
     
     % Add the result to v_lists
     vs_list = [vs_list, vs];
@@ -85,19 +85,13 @@ end
 
 % calculate and display the spacial forward kinematics
 T_sb = FK_space(M, screw_list_s, th_list);
-disp(T_sb);
+%disp(T_sb);
 
 %% Part c: Find the forward kinematics in reference to the body frame | FK_body Function
-T_bs = FK_body(M, screw_list_b, th_list);
-disp(T_bs);
+T_bs = FK_body(M, screw_list_s, th_list);
+%disp(T_bs);
 
-%% 
-% Test forward kinematics
-
-% Function outputs
-Ts = FK_space(M, screw_list_s, th_list);
-
-Tb = fk_body(M, screw_list_b, th_list);
+%% Test Forward Kinematics
 
 % Explicit calculations
 Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
@@ -114,12 +108,14 @@ Ts_test = Ts_test * M;
 error_count = 0;
 tol = 1e-4;
 
-if ~all(ismembertol(Ts, Ts_test, tol), 'all')
-    fprintf("Error: Spatial forward kinematics are wrong");
+if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
+    fprintf("Error: Spatial forward kinematics are wrong\n");
+    error_count = error_count + 1;
 end
 
-if ~all(ismembertol(Tb, Tb_test, tol), 'all')
-    fprintf("Error: Body forward kinematics are wrong");
+if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
+    fprintf("Error: Body forward kinematics are wrong\n");
+    error_count = error_count + 1;
 end
 
 fprintf("Total errors: %d", error_count);
