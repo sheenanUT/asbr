@@ -118,4 +118,4 @@ if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
     error_count = error_count + 1;
 end
 
-fprintf("Total errors: %d", error_count);
+fprintf("Total errors: %d\n", error_count);
