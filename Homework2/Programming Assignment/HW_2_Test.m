@@ -12,13 +12,13 @@ L5 = 780 * 10^-3;
 L6 = 215 * 10^-3;
 
 % joint angles
-th1 = 10;
-th2 = 20;
-th3 = 30;
-th4 = 40;
-th5 = 50;
-th6 = 60;
-th_list = [th1 th2 th3 th4 th5 th6];
+th1 = 0;
+th2 = -120;
+th3 = 60;
+th4 = 0;
+th5 = 0;
+th6 = 0;
+th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
 
 %% Part a: Find the FK from spatial frame using FK_space.m
 % home configuration
@@ -38,12 +38,18 @@ w6 = [-1; 0; 0];
 w_list = [w1 w2 w3 w4 w5 w6];
 
 % Screw axis position vectors, space frame
-qs1 = [0; 0; 0];
+% Problem: This only works when the q's are at the exact locations of the
+% joints. For now the arbitrary q's are commented out in favor of the
+% precise q's.
+qs1 = [0; 0; -L1];
 qs2 = [L2; 0; 0];
 qs3 = [L2+L3; 0; 0];
-qs4 = [0; 0; -L4];
-qs5 = [L2+L3+L5; 0; 0];
-qs6 = [0; 0; -L4];
+qs4 = [L2+L3; 0; -L4];
+%qs4 = [0; 0; -L4];
+qs5 = [L2+L3+L5; 0; -L4];
+%qs5 = [L2+L3+L5; 0; 0];
+qs6 = [L2+L3+L5+L6; 0; -L4];
+%qs6 = [0; 0; -L4];
 qs_list = [qs1, qs2, qs3, qs4, qs5, qs6];
 
 % Screw axis position vectors, body frame
@@ -84,7 +90,7 @@ for i = 1:length(w_list)
 end
 
 % calculate and display the spacial forward kinematics
-T_sb = FK_space(M, screw_list_s, th_list);
+T_sb = FK_space(M, screw_list_s, th_list, qs_list);
 %disp(T_sb);
 
 %% Part c: Find the forward kinematics in reference to the body frame | FK_body Function
