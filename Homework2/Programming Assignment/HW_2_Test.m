@@ -14,9 +14,9 @@ L6 = 215 * 10^-3;
 % joint angles
 th1 = 0;
 th2 = -120;
-th3 = 60;
+th3 = 90;
 th4 = 0;
-th5 = 0;
+th5 = -90;
 th6 = 0;
 th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
 
@@ -53,10 +53,10 @@ qs6 = [L2+L3+L5+L6; 0; -L4];
 qs_list = [qs1, qs2, qs3, qs4, qs5, qs6];
 
 % Screw axis position vectors, body frame
-qb1 = [-L6-L5-L3-L2; 0; 0];
+qb1 = [-L6-L5-L3-L2; 0; L4-L1];
 qb2 = [-L6-L5-L3; 0; L4];
 qb3 = [-L6-L5; 0; L4];
-qb4 = [-L6; 0; 0];
+qb4 = [-L6-L5; 0; 0];
 qb5 = [-L6; 0; 0];
 qb6 = [0; 0; 0];
 qb_list = [qb1, qb2, qb3, qb4, qb5, qb6];
@@ -90,11 +90,13 @@ for i = 1:length(w_list)
 end
 
 % calculate and display the spacial forward kinematics
+figure(1);
 T_sb = FK_space(M, screw_list_s, th_list, qs_list);
 %disp(T_sb);
 
 %% Part c: Find the forward kinematics in reference to the body frame | FK_body Function
-T_bs = FK_body(M, screw_list_s, th_list);
+figure(2);
+T_bs = FK_body(M, screw_list_b, th_list, qb_list);
 %disp(T_bs);
 
 %% Test Forward Kinematics

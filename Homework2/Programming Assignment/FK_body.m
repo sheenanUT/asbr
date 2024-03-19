@@ -1,54 +1,72 @@
 %% find the forward kinematics in the body frame
-function T = FK_body(home_config, screw_list, theta_list)      % inputs are the home configurations, screw axes list, and theta list
-    R_sb = home_config(1:3, 1:3);    % rotation matrix of b from s
-    R_sb_t = transpose(R_sb);    % transpose of rotation matrix of b from s
+function T = FK_body(home_config, body_screw_list, theta_list, body_q_list)     
+%FK_BODY Calculates forward kinematics of robot in body frame
+%   Inputs:
+%       home_config = 4x4 transformation matrix representing zero-pose
+%       configuration of robot end effector
+%       body_screw_list = 6xn matrix where the columns are the robot's
+%           screw axes in the body frame (n-joint robot)
+%       theta_list = 1xn vector of joint angles for desired position
+%       q_list = 3xn matrix where the columns are the positions of the
+%           robot's joints in the zero-position, body-frame
+%   Outputs:
+%       T = 4x4 transformation matrix representing final configuration of
+%           robot end effector in the body frame
+%   Function also produces a 3D graph of the zero-pose frame, end-effector
+%   frame, and joint screw axes
 
-    p_sb = home_config(1:3, 4);  % translation vector of b from s
-    % translation vector of b from s under the se(3) form
-    p_sb_skew = v2skew(p_sb');
+    % initialize list as cell array to separate each 4x4 matrix for all
+    % body screws in se(3) form
+    B_list = cell(1, length(body_screw_list));   
 
-    %adjacent matrix of inverse of home_config (M)
-    adj_M_inv = [
-    R_sb_t, zeros(3, 3);
-    -R_sb_t*p_sb_skew, R_sb_t];
+    % rotation vectors in homogeneous form
+    w_list_h = zeros(4, length(body_screw_list));
+    % position vectors in homogeneous form
+    q_list_h = [body_q_list; ones(1, length(body_screw_list))];
 
+    for i=1:length(body_screw_list)
+        % select body screw axis of column i
+        body_screw = body_screw_list(:, i);
+        % get rotation vector from screw
+        w = body_screw(1:3);      
 
-    % compute screw axis in the body frame and add to screw_b_list
-    body_screw_list = [];       % initialize list for body screws in se(3) form
-    for i = 1:length(screw_list)
-        body_screw = adj_M_inv * screw_list(:, i);  % compute the screw in the body frame for S(i)
-        body_screw_list = [body_screw_list, body_screw];    % add body screw axis to body_screw_list
-    end
+        % body screw axis in se(3) form
+        B = screw2mat(body_screw');
 
-    % generate all body screw axes in se(3) form
-    B_list = cell(1, length(screw_list));        % initilaize list for all body screws in se(3) form
-    for i=1:length(screw_list)
-        body_screw = body_screw_list(:, i);        % select body screw axis of column i
-        w = body_screw(1:3);      % select first three elements of body screw axis to form omega vector
-        v = body_screw(4:6);      % select last three elements of body screw axis to form velocity vector
-
-        % form the skew symmetric matrix of omega
-        w_skew = [
-            0, -w(3), w(2);
-            w(3), 0, -w(1);
-            -w(2), w(1), 0];
-
-        % form the body screw axis in se(3) form
-        B = [
-            w_skew, v;
-            0, 0, 0, 0];
         B_list{i} = B;
+        w_list_h(1:3, i) = w;
     end
-
     
     % compute the body forward kinematics
-    T = home_config;      % initialize the equation with home configuration
+    T = home_config;      % initialize transform as home configuration
     for i = 1:length(B_list)
         B = B_list{i};      % use the current se(3) representation of the screw
         theta = theta_list(i);      % use current angle value
 
         exp_B_theta = expm(B*theta);    % exponential form of screw motion
         T = T * exp_B_theta;    % update the transformation matrix
+
+        % transform w, q vectors to their new positions
+        w_list_h(:, i) = T * w_list_h(:, i);
+        q_list_h(:, i) = T * q_list_h(:, i);
     end
     
+    % Plot frames and screw axes in 3D
+    hold on;    % Plot all on 1 graph
+    plot_config(T);     % End effector position
+    plot_config(home_config);    % Body frame
+
+    for i = 1:length(body_screw_list)
+        % Plot screw axis rotation vectors
+        plot_vector(w_list_h(1:3, i)' / 2, q_list_h(1:3, i)', '-m');
+        % Plot arrow on positive end
+        plot_vector([0 0 0], q_list_h(1:3, i)' + w_list_h(1:3, i)' / 2,...
+            '-m^');
+        if i > 1
+            % Plot robot segments
+            plot_vector(q_list_h(1:3, i)' - q_list_h(1:3, i - 1)',...
+                        q_list_h(1:3, i - 1)', '-ko')
+        end
+    end
+    hold off;
 end
