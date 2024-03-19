@@ -116,11 +116,11 @@ disp(T_bs);
 
 
 %% Part d: Find the space and body form Jacobian of the robot
-% J_s = J_space(screw_list, th_list);       % find space jacobian
-% disp(J_s);
+J_s = J_space(screw_list, th_list);       % find space jacobian
+disp(J_s);
 
-% J_b = J_space(screw_list, th_list)       % find body jacobian
-% disp(J_b)
+J_b = J_body(body_screw_list, th_list);        % find body jacobian
+disp(J_b);
 
 
 
