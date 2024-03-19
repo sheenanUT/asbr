@@ -1,7 +1,7 @@
 %% find the forward kinematics in the space frame
 function T = FK_space(home_config, screw_list, theta_list)      % inputs are the home configurations, screw axes list, and theta list
     % generate all screw axes in se(3) form
-    S_list = cell(1, length(screw_list));        % initilaize list for all screws in se(3) form
+    S_list = cell(1, length(screw_list));        % initilaize list as cell array to separate each 4x4 matrix for all screws in se(3) form
     for i=1:length(screw_list)
         screw = screw_list(:, i);        % select screw axis of column i
         w = screw(1:3);      % select first three elements of screw axis to form omega vector

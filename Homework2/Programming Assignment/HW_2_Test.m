@@ -19,9 +19,6 @@ th4 = 40;
 th5 = 50;
 th6 = 60;
 
-
-
-%% Part a: Find the FK from spatial frame using FK_space.m
 % home configuration
 M = [
     1, 0, 0, L2+L3+L5+L6;
@@ -56,19 +53,59 @@ for i = 1:length(w_list)
     v_list = [v_list, v];   % add velocity vector element to v_list
 end
 
-screw_list = [];
+%% compute spatial screw list
+screw_list = [];        % list of screws
 % format the screw axes using w and v. Add them to screw_list
 for i = 1:length(w_list)
     screw = [w_list(:, i ); v_list(:, i)];  % stack w(i) and v(i)
     screw_list = [screw_list, screw];   % add screw axis to screw_list
 end
 
+
+
+%% compute body screw list
+R_sb = M(1:3, 1:3);    % rotation matrix of b from s
+R_sb_t = transpose(R_sb);    % transpose of rotation matrix of b from s
+
+p_sb = M(1:3, 4);  % translation vector of b from s
+% translation vector of b from s under the se(3) form
+p_sb_skew = [
+            0, -p_sb(3), p_sb(2);
+            p_sb(3), 0, -p_sb(1);
+            -p_sb(2), p_sb(1), 0];
+
+% adjacent matrix of inverse of home_config (M)
+adj_M_inv = [
+R_sb_t, zeros(3, 3);
+-R_sb_t*p_sb_skew, R_sb_t];
+
+
+% compute screw axis in the body frame and add to screw_b_list
+body_screw_list = [];       % initialize list for body screws
+for i = 1:length(screw_list)
+    body_screw = adj_M_inv * screw_list(:, i);  % compute the screw in the body frame for S_i
+    body_screw_list = [body_screw_list, body_screw];    % add body screw axis to body_screw_list
+end
+
+
+
+%% Part a: Find the FK from spatial frame using FK_space.m
 % calculate and display the spacial forward kinematics
-T_sb = FK_space(M, screw_list, th_list);
-disp(T_sb);
+% T_sb = FK_space(M, screw_list, th_list);        % find FK in {s}
+% disp(T_sb);
 
 
 
 %% Part c: Find the forward kinematics in reference to the body frame | FK_body Function
-T_bs = FK_body(M, screw_list, th_list);
+T_bs = FK_body(M, body_screw_list, th_list);     % find FK in {b}
 disp(T_bs);
+
+
+
+%% Part d: Find the space and body form Jacobian of the robot
+% J_s = J_space(screw_list, th_list);       % find space jacobian
+% disp(J_s);
+
+% J_b = J_space(screw_list, th_list)       % find body jacobian
+% disp(J_b)
+
