@@ -26,10 +26,8 @@ function T = FK_space(home_config, screw_list, theta_list, q_list)      % inputs
         T = T * exp_S_theta;    % update the transformation matrix
 
         % transform w, q vectors to their new positions
-        if i < length(screw_list)
-            w_list_h(:, i + 1) = T * w_list_h(:, i + 1);
-            q_list_h(:, i + 1) = T * q_list_h(:, i + 1);
-        end
+        w_list_h(:, i + 1) = T * w_list_h(:, i + 1);
+        q_list_h(:, i + 1) = T * q_list_h(:, i + 1);
 
     end
     T = T * home_config;        % multiply the home configuration at the end of the formula 
