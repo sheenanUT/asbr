@@ -15,5 +15,5 @@ hold on % All on same plot
 plot_vector(R(:, 1)', q, '-r');  % Plot x
 plot_vector(R(:, 2)', q, '-g');  % Plot y
 plot_vector(R(:, 3)', q, '-b');  % Plot z
-hold off
+
 end

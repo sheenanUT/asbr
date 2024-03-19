@@ -19,6 +19,10 @@ end
 % Shift origin of v to q
 v_shifted = v + q;
 
+% Define plot settings
+view(3);    % plot in 3D
+axis equal; % equal scaling for axes
+
 % Plot line from q to v+q
 plot3([q(1), v_shifted(1)], ...
       [q(2), v_shifted(2)], ...
