@@ -63,9 +63,9 @@ qb6 = [0; 0; 0];
 qb_list = [qb1, qb2, qb3, qb4, qb5, qb6];
 
 v_list = [];    % list of velocity vectors
-% compute cross products of w and q. Add them to v_list
+% compute cross products of -w and q. Add them to v_list
 for i = 1:length(w_list)
-    v = cross(w_list(:, i), q_list(:, i));  % compute the cross product
+    v = cross(-w_list(:, i), q_list(:, i));  % compute the cross product
     v_list = [v_list, v];   % add velocity vector element to v_list
 end
 
