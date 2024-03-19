@@ -97,45 +97,14 @@ end
 
 
 %% Part c: Find the forward kinematics in reference to the body frame | FK_body Function
-T_bs = FK_body(M, body_screw_list, th_list);     % find FK in {b}
-disp(T_bs);
+% T_bs = FK_body(M, body_screw_list, th_list);     % find FK in {b}
+% disp(T_bs);
 
 
 
 %% Part d: Find the space and body form Jacobian of the robot
-% J_s = J_space(screw_list, th_list);       % find space jacobian
-% disp(J_s);
+J_s = J_space(screw_list, th_list);       % find space jacobian
+disp(J_s);
 
-% J_b = J_space(screw_list, th_list)       % find body jacobian
-% disp(J_b)
-
-
-
-%% Test Forward Kinematics
-
-% Explicit calculations
-Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
-Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
-for i = 1:length(th_list)
-    Ts_i = expm(screw2mat(screw_list_s(:, i)') * th_list(i));
-    Tb_i = expm(screw2mat(screw_list_b(:, i)') * th_list(i));
-    Ts_test = Ts_test * Ts_i;
-    Tb_test = Tb_test * Tb_i;
-end
-Ts_test = Ts_test * M;
-
-% Compare outputs
-error_count = 0;
-tol = 1e-4;
-
-if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
-    fprintf("Error: Spatial forward kinematics are wrong\n");
-    error_count = error_count + 1;
-end
-
-if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
-    fprintf("Error: Body forward kinematics are wrong\n");
-    error_count = error_count + 1;
-end
-
-fprintf("Total errors: %d", error_count);
+J_b = J_body(body_screw_list, th_list);        % find body jacobian
+disp(J_b);

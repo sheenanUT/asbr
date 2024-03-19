@@ -1,6 +1,7 @@
 %% find the jacobian matrix in the space frame
 function Js = J_space(screw_list, theta_list)     % find the jacobian matrix in {s} using the list of screw axes and list of joint angles
-    Js = [];        % initialize list for jacobian columns which make up jacboian matrix
+    Js = [];        % initialize list for jacobian columns which make up space jacboian matrix
+    n = length(screw_list);        % length of screw list
 
     % generate all screw axes in se(3) form up to S_i
     S_list = cell(1, length(screw_list));        % initilaize list as cell array to separate each 4x4 matrix for all screws in se(3) form
@@ -23,12 +24,13 @@ function Js = J_space(screw_list, theta_list)     % find the jacobian matrix in 
         S_list{i} = S;
     end
 
-    % generate jacboian matrix
-    Js = [Js, screw_list(:, 1)];     % set first jacobian
-    for i = 1:(length(screw_list)-1)     % S_i | loop from 1 to i-1
-        % generate matrix of product of exponentials | [e^S_1*th_1][e^S_2*th_2]...[e^S_i*th_i]
-        exp_prod = eye(length(S_list(:, 1)));     % initialized as identity matrix
-        for j = 1:i     % loop from 1 to current i iteration
+
+    % generate space jacboian matrix
+    Js = [Js, screw_list(:, 1)];     % set first jacobian columna as S1
+    for i = 1:(n-1)     % loop from 1 to n-1
+        % generate matrix of product of exponentials | e^[S_1]*th_1 * e^[S_2]*th_2...*e^[S_n]*th_n]
+        exp_prod = expm(S_list{1}*theta_list(1));     % initialize as e^[S_1]*th_1
+        for j = 2:i     % loop from 2 to current i iteration
             S = S_list{j};        % set current screw axis of [S] form
             theta = theta_list(j);        % set current joint angle
 
@@ -45,11 +47,11 @@ function Js = J_space(screw_list, theta_list)     % find the jacobian matrix in 
             -p(2), p(1), 0];
 
         % compute adjacent matrix of current exp_prod
-        adj_exp_i = [
+        adj_exp = [
             R, zeros(3, 3);
             -R*p_skew, R];
 
-        Js_col = adj_exp_i * screw_list(:, i);        % compute the jacobian column
-        Js = [Js, Js_col];      % append the jacobian column
+        Js_col = adj_exp * screw_list(:, i);        % compute the space jacobian column
+        Js = [Js, Js_col];      % append the space jacobian column
     end
 end
