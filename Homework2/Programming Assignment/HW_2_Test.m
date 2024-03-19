@@ -12,12 +12,13 @@ L5 = 780 * 10^-3;
 L6 = 215 * 10^-3;
 
 % joint angles
-th1 = 10;
-th2 = 20;
-th3 = 30;
-th4 = 40;
-th5 = 50;
-th6 = 60;
+th1 = 0;
+th2 = -120;
+th3 = 60;
+th4 = 0;
+th5 = 0;
+th6 = 0;
+th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
 
 % home configuration
 M = [
@@ -33,18 +34,33 @@ w3 = [0; 1; 0];
 w4 = [-1; 0; 0];
 w5 = [0; 0; 1];
 w6 = [-1; 0; 0];
-
-% locations of center of rotations
-q1 = [0; 0; 0];
-q2 = [L2; 0; 0];
-q3 = [L2+L3; 0; 0];
-q4 = [0; 0; -L1];
-q5 = [L2+L3+L5; 0; -L4];
-q6 = [0; 0; -L4];
-
 w_list = [w1, w2, w3, w4, w5, w6];  % list of omegas
-q_list = [q1, q2, q3, q4, q5, q6];  % list of q's
-th_list = [th1, th2, th3, th4, th5, th6];   % list of joint angles
+
+% Screw axis position vectors, space frame
+% Problem: This only works when the q's are at the exact locations of the
+% joints. For now the arbitrary q's are commented out in favor of the
+% precise q's.
+qs1 = [0; 0; -L1];
+qs2 = [L2; 0; 0];
+qs3 = [L2+L3; 0; 0];
+qs4 = [L2+L3; 0; -L4];
+%qs4 = [0; 0; -L4];
+qs5 = [L2+L3+L5; 0; -L4];
+%qs5 = [L2+L3+L5; 0; 0];
+qs6 = [L2+L3+L5+L6; 0; -L4];
+%qs6 = [0; 0; -L4];
+q_list = [qs1, qs2, qs3, qs4, qs5, qs6];  % list of q's
+
+
+% Screw axis position vectors, body frame
+% TODO: determine whether these are still necessary
+qb1 = [-L6-L5-L3-L2; 0; 0];
+qb2 = [-L6-L5-L3; 0; L4];
+qb3 = [-L6-L5; 0; L4];
+qb4 = [-L6; 0; 0];
+qb5 = [-L6; 0; 0];
+qb6 = [0; 0; 0];
+qb_list = [qb1, qb2, qb3, qb4, qb5, qb6];
 
 v_list = [];    % list of velocity vectors
 % compute cross products of w and q. Add them to v_list
@@ -69,10 +85,7 @@ R_sb_t = transpose(R_sb);    % transpose of rotation matrix of b from s
 
 p_sb = M(1:3, 4);  % translation vector of b from s
 % translation vector of b from s under the se(3) form
-p_sb_skew = [
-            0, -p_sb(3), p_sb(2);
-            p_sb(3), 0, -p_sb(1);
-            -p_sb(2), p_sb(1), 0];
+p_sb_skew = v2skew(p_sb')
 
 % adjacent matrix of inverse of home_config (M)
 adj_M_inv = [
@@ -91,8 +104,8 @@ end
 
 %% Part a: Find the FK from spatial frame using FK_space.m
 % calculate and display the spacial forward kinematics
-% T_sb = FK_space(M, screw_list, th_list);        % find FK in {s}
-% disp(T_sb);
+T_sb = FK_space(M, screw_list, th_list, q_list);        % find FK in {s}
+disp(T_sb);
 
 
 
@@ -117,8 +130,8 @@ disp(T_bs);
 Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
 Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
 for i = 1:length(th_list)
-    Ts_i = expm(screw2mat(screw_list_s(:, i)') * th_list(i));
-    Tb_i = expm(screw2mat(screw_list_b(:, i)') * th_list(i));
+    Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
+    Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
     Ts_test = Ts_test * Ts_i;
     Tb_test = Tb_test * Tb_i;
 end
