@@ -1,5 +1,5 @@
-function [adj] = adjTransform(T)
-%ADJTRANSFORM Calculates adjunct representation of given transformation
+function [adj] = adj_transform(T)
+%ADJ_TRANSFORM Calculates adjunct representation of given transformation
 %   Inputs:
 %       T = 4x4 rigid body transformation matrix
 %   Outputs:
