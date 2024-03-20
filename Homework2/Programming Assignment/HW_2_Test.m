@@ -161,3 +161,11 @@ end
 %% Display test results
 fprintf("Total errors: %d\n", error_count);
 
+
+
+
+%% Find the singularity configurations of the robot
+% syms th1 th2 th3 th4 th5 th6
+% th_list = [th1, th2, th3, th4, th5, th6];
+% singularities = singularity(screw_list);       % find the singularity configurations of the robot
+% disp(singularities);
