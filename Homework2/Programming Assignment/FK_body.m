@@ -32,7 +32,6 @@ function T = FK_body(home_config, body_screw_list, theta_list, body_q_list)
 
         % body screw axis in se(3) form
         B = screw2mat(body_screw');
-
         B_list{i} = B;
         w_list_h(1:3, i) = w;
     end
