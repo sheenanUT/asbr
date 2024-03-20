@@ -96,7 +96,7 @@ body_screw_list = adj_M_inv * screw_list;       % transforms screw axis to body 
 
 
 %% Part d: Find the space and body form Jacobian of the robot
-% J_s = J_space(screw_list, th_list);       % find space jacobian
+J_s = J_space(screw_list, th_list);       % find space jacobian
 % disp(J_s);
 % 
 % J_b = J_body(body_screw_list, th_list);       % find body jacobian
@@ -104,8 +104,7 @@ body_screw_list = adj_M_inv * screw_list;       % transforms screw axis to body 
 
 
 
-%% Find the singularity configurations of the robot
-% syms th1 th2 th3 th4 th5 th6
-% th_list = [th1, th2, th3, th4, th5, th6];
-% singularities = singularity(screw_list);       % find the singularity configurations of the robot
-% disp(singularities);
+%% determine if robot is in a singularity configuration
+singularity(J_s);       % display if robot is in singularity
+
+
