@@ -62,7 +62,6 @@ for i = 1:length(w_list)
 end
 
 
-
 %% compute body screw list
 R_sb = M(1:3, 1:3);    % rotation matrix of b from s
 R_sb_t = transpose(R_sb);    % transpose of rotation matrix of b from s
@@ -103,8 +102,16 @@ end
 
 
 %% Part d: Find the space and body form Jacobian of the robot
-J_s = J_space(screw_list, th_list);       % find space jacobian
-disp(J_s);
+% J_s = J_space(screw_list, th_list);       % find space jacobian
+% disp(J_s);
+% 
+% J_b = J_body(body_screw_list, th_list);       % find body jacobian
+% disp(J_b);
 
-J_b = J_body(body_screw_list, th_list);        % find body jacobian
-disp(J_b);
+
+
+%% Find the singularity configurations of the robot
+% syms th1 th2 th3 th4 th5 th6
+% th_list = [th1, th2, th3, th4, th5, th6];
+% singularities = singularity(screw_list);       % find the singularity configurations of the robot
+% disp(singularities);

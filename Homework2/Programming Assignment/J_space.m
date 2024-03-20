@@ -36,7 +36,7 @@ function Js = J_space(screw_list, theta_list)     % find the jacobian matrix in 
 
             exp_prod = exp_prod * expm(S*theta);        % exp_prod * e^[S_i]*th_i
         end
-
+        
         R = exp_prod(1:3, 1:3);     % rotation matrix of current exp_prod
         p = exp_prod(1:3, 4);       % translation vector of current exp_prod
 
@@ -51,7 +51,7 @@ function Js = J_space(screw_list, theta_list)     % find the jacobian matrix in 
             R, zeros(3, 3);
             -R*p_skew, R];
 
-        Js_col = adj_exp * screw_list(:, i);        % compute the space jacobian column
+        Js_col = adj_exp * screw_list(:, i+1);        % compute the space jacobian column
         Js = [Js, Js_col];      % append the space jacobian column
     end
 end
