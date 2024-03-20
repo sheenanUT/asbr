@@ -67,14 +67,18 @@ R_sb = M(1:3, 1:3);    % rotation matrix of b from s
 R_sb_t = transpose(R_sb);    % transpose of rotation matrix of b from s
 
 p_sb = M(1:3, 4);  % translation vector of b from s
-p_sb_skew = v2skew(p_sb');    % translation vector of b from s under the se(3) form
+% translation vector of b from s under the se(3) form
+p_sb_skew = [
+            0, -p_sb(3), p_sb(2);
+            p_sb(3), 0, -p_sb(1);
+            -p_sb(2), p_sb(1), 0];
 
 % adjacent matrix of inverse of home_config (M)
 adj_M_inv = [
 R_sb_t, zeros(3, 3);
 -R_sb_t*p_sb_skew, R_sb_t];
 
-body_screw_list = adj_M_inv * screw_list;   % transform screw axes to body frame
+body_screw_list = adj_M_inv * screw_list;       % transforms screw axis to body frame
 
 
 
