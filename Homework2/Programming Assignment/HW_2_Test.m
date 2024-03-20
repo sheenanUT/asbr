@@ -74,7 +74,7 @@ adj_M_inv = [
 R_sb_t, zeros(3, 3);
 -R_sb_t*p_sb_skew, R_sb_t];
 
-body_screw_list = adj_M_inv * screw_list;   % Transform screw axes to body frame
+body_screw_list = adj_M_inv * screw_list;   % transform screw axes to body frame
 
 
 
