@@ -28,7 +28,6 @@ S = [w_norm, v_norm];
 % Calculate orientation for each angle theta using matrix exponent
 for i = 1:5
     T_screw = expm(screw2mat(S) * thetas(i));
-'/
     % Apply screw transform to original orientation
     Ts(:, :, i) = T_screw * T;
 end

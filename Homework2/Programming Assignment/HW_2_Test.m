@@ -1,3 +1,6 @@
+% Toggle function readouts
+verbose = true;
+
 %% Robot-Specific Variables
 % link dimensions in m
 L1 = 500 * 10^-3;
@@ -70,42 +73,41 @@ body_q_list = body_q_list_h(1:3, :);
 %% Part a/b: Find the FK from spatial frame using FK_space.m
 % calculate and display the spacial forward kinematics
 figure(1);
-T_sb = FK_space(M, screw_list_s, th_list, q_list);
-fprintf("Space-frame forward kinematics:\n");
-disp(T_sb);
+T_sb = FK_space(M, screw_list, th_list, q_list);
+if verbose
+    fprintf("Space-frame forward kinematics:\n");
+    disp(T_sb);
+end
 
 %% Part c: Find the FK from body frame using FK_body.m
 figure(2);
 T_bs = FK_body(M, body_screw_list, th_list, body_q_list);
-fprintf("Body-frame forward kinematics:\n");
-disp(T_bs);
+if verbose
+    fprintf("Body-frame forward kinematics:\n");
+    disp(T_bs);
+end
 
 %% Part d: Find the space and body form Jacobian of the robot
 J_s = J_space(screw_list, th_list);       % find space jacobian
-fprintf("Space-frame Jacobian:\n");
-disp(J_s);
+if verbose
+    fprintf("Space-frame Jacobian:\n");
+    disp(J_s);
+end
 
 J_b = J_body(body_screw_list, th_list);   % find body jacobian
-fprintf("Body-frame Jacobian:\n");
-disp(J_b);
+if verbose
+    fprintf("Body-frame Jacobian:\n");
+    disp(J_b);
+end
 
 %% Test Forward Kinematics
-
-% Explicit calculations
-Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
-Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
-for i = 1:length(th_list)
-    Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
-    Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
-    Ts_test = Ts_test * Ts_i;
-    Tb_test = Tb_test * Tb_i;
-end
-Ts_test = Ts_test * M;
-
-% Compare outputs
 error_count = 0;
 tol = 1e-4;
 
+Ts_test = FKinSpace(M, screw_list, th_list');
+Tb_test = FKinBody(M, body_screw_list, th_list');
+
+% Compare outputs
 if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
     fprintf("Error: Spatial forward kinematics are wrong\n");
     error_count = error_count + 1;
@@ -116,4 +118,29 @@ if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
     error_count = error_count + 1;
 end
 
+%% Test Jacobian Functions
+J_s_test = JacobianSpace(screw_list, th_list);
+J_b_test = JacobianBody(body_screw_list, th_list);
+
+% Compare outputs
+if ~all(ismembertol(J_s, J_s_test, tol), 'all')
+    fprintf("Error: Space Jacobian is wrong\n");
+    error_count = error_count + 1;
+end
+
+if ~all(ismembertol(J_b, J_b_test, tol), 'all')
+    fprintf("Error: Body Jacobian is wrong\n");
+    error_count = error_count + 1;
+end
+
+% Test space-body relation
+% J_b = Adj(T_bs) * J_s
+if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
+    fprintf("Error: Space-Body relation test failed\n");
+    error_count = error_count + 1;
+end
+
+%% Display test results
 fprintf("Total errors: %d\n", error_count);
+
+
