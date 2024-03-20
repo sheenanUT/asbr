@@ -57,17 +57,7 @@ for i = 1:length(w_list)
 end
 
 %% compute body screw list and q's
-R_sb = M(1:3, 1:3);    % rotation matrix of b from s
-R_sb_t = transpose(R_sb);    % transpose of rotation matrix of b from s
-
-p_sb = M(1:3, 4);  % translation vector of b from s
-% translation vector of b from s under the se(3) form
-p_sb_skew = v2skew(p_sb');
-
-% adjacent matrix of inverse of home_config (M)
-adj_M_inv = [
-R_sb_t, zeros(3, 3);
--R_sb_t*p_sb_skew, R_sb_t];
+adj_M_inv = adj_transform(inv(M));
 
 % Transform screw axes to body frame
 body_screw_list = adj_M_inv * screw_list;
@@ -95,7 +85,7 @@ J_s = J_space(screw_list, th_list);       % find space jacobian
 fprintf("Space-frame Jacobian:\n");
 disp(J_s);
 
-J_b = J_body(body_screw_list, th_list);        % find body jacobian
+J_b = J_body(body_screw_list, th_list);   % find body jacobian
 fprintf("Body-frame Jacobian:\n");
 disp(J_b);
 
