@@ -65,3 +65,4 @@ disp(vpa(J_b))
 
 tip_vel = J_b * [1;1;1;1];
 disp(vpa(tip_vel))
+
