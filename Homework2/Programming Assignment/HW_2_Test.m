@@ -33,9 +33,9 @@ w3 = [0; 1; 0];
 w4 = [-1; 0; 0];
 w5 = [0; 0; 1];
 w6 = [-1; 0; 0];
-w_list = [w1, w2, w3, w4, w5, w6];  % list of omegas
+w_list = [w1, w2, w3, w4, w5, w6];      % list of omegas
 
-% Screw axis position vectors, space frame
+% screw axis position vectors, space frame
 q1 = [0; 0; -L1];
 q2 = [L2; 0; 0];
 q3 = [L2+L3; 0; 0];
@@ -44,8 +44,9 @@ q5 = [L2+L3+L5; 0; -L4];
 q6 = [L2+L3+L5+L6; 0; -L4];
 q_list = [q1, q2, q3, q4, q5, q6];  % list of q's
 
+% velocity vectors
 v_list = zeros([3, length(w_list)]);    % list of velocity vectors
-% compute cross products of -w and q. Add them to v_list
+% compute cross products of w and q. Add them to v_list
 for i = 1:length(w_list)
     v = cross(-w_list(:, i), q_list(:, i));  % compute the cross product
     v_list(:, i) = v;   % add velocity vector element to v_list
@@ -60,12 +61,11 @@ for i = 1:length(w_list)
 end
 
 %% compute body screw list and q's
-adj_M_inv = adj_transform(inv(M));
+% transform screw list to body frame
+adj_M_inv = adj_transform(inv(M));      % adjacent of home configuration
+body_screw_list = adj_M_inv * screw_list;       % transforms screw axis to body frame
 
-% Transform screw axes to body frame
-body_screw_list = adj_M_inv * screw_list;
-
-% Transform q's to body frame
+% transform q's to body frame
 q_list_h = [q_list; ones(1, length(q_list))];  % homogeneous form
 body_q_list_h = inv(M) * q_list_h;  % T_bs * q_s = q_b
 body_q_list = body_q_list_h(1:3, :);
@@ -100,9 +100,27 @@ if verbose
     disp(J_b);
 end
 
+%% determine if robot is in a singularity configuration
+singularity(J_s);       % display if robot is in singularity
+
+
+
 %% Test Forward Kinematics
+% Explicit calculations
+Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
+Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
+for i = 1:length(th_list)
+    Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
+    Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
+    Ts_test = Ts_test * Ts_i;
+    Tb_test = Tb_test * Tb_i;
+end
+Ts_test = Ts_test * M;
+
+% Compare outputs
 error_count = 0;
 tol = 1e-4;
+
 
 Ts_test = FKinSpace(M, screw_list, th_list');
 Tb_test = FKinBody(M, body_screw_list, th_list');
@@ -142,5 +160,4 @@ end
 
 %% Display test results
 fprintf("Total errors: %d\n", error_count);
-
 
