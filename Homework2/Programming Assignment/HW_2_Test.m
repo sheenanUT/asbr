@@ -1,5 +1,5 @@
 % Toggle function readouts
-verbose = false;
+verbose = true;
 
 %% Robot-Specific Variables
 % link dimensions in m
@@ -103,7 +103,7 @@ end
 %% determine if robot is in a singularity configuration
 singularity(J_s)       % display if robot is in singularity
 
-
+%% control the robot from arbitrary configuration a to b
 
 % %% Test Forward Kinematics
 % % Explicit calculations
