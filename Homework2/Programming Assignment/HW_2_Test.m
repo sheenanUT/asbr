@@ -1,5 +1,5 @@
 % Toggle function readouts
-verbose = true;
+verbose = false;
 
 %% Robot-Specific Variables
 % link dimensions in m
@@ -10,7 +10,7 @@ L4 = 70 * 10^-3;
 L5 = 780 * 10^-3;
 L6 = 215 * 10^-3;
 
-% joint angles
+% joint angles in degrees
 th1 = 0;
 th2 = -120;
 th3 = 90;
@@ -18,6 +18,20 @@ th4 = 0;
 th5 = -90;
 th6 = 0;
 th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
+
+% ensure proper joint angles
+if abs(th1) > 180
+    disp('Angle 1 out of range. Proper range: ±180°'); end
+if th2<-145 || 45<th2
+    disp('Angle 2 out of range. Proper range: -145° / 45°'); end
+if th3<-30 || 150<th3
+    disp('Angle 3 out of range. Proper range: -30° / 150°'); end
+if abs(th4) > 350
+    disp('Angle 4 out of range. Proper range: ±350°'); end
+if abs(th5) > 125
+    disp('Angle 5 out of range. Proper range: ±125°'); end
+if abs(th6) > 350
+    disp('Angle 6 out of range. Proper range: ±350°'); end
 
 % home configuration
 M = [
@@ -70,6 +84,7 @@ q_list_h = [q_list; ones(1, length(q_list))];  % homogeneous form
 body_q_list_h = inv(M) * q_list_h;  % T_bs * q_s = q_b
 body_q_list = body_q_list_h(1:3, :);
 
+
 %% Part a/b: Find the FK from spatial frame using FK_space.m
 % calculate and display the spacial forward kinematics
 figure(1);
@@ -103,7 +118,19 @@ end
 %% determine if robot is in a singularity configuration
 singularity(J_s)       % display if robot is in singularity
 
-%% control the robot from arbitrary configuration a to b
+
+%% Part h: Inverse Kinematics Function
+%control the robot from arbitrary configuration a to b
+T_desired = [
+    -0.4924    0.8660    0.0868    0.4696
+    0.1736   -0.0000    0.9848    0.0373
+    0.8529    0.5000   -0.1504    1.1796
+    0         0         0    1.0000];
+
+theta_list_desired = J_inverse_kinematics(th_list, T_desired);       % calculate angles to for desired end-effector position
+
+
+
 
 % %% Test Forward Kinematics
 % % Explicit calculations
