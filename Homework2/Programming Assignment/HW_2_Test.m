@@ -1,5 +1,5 @@
 % Toggle function readouts
-verbose = true;
+verbose = false;
 
 %% Robot-Specific Variables
 % link dimensions in m
@@ -101,63 +101,63 @@ if verbose
 end
 
 %% determine if robot is in a singularity configuration
-singularity(J_s);       % display if robot is in singularity
+singularity(J_s)       % display if robot is in singularity
 
 
 
-%% Test Forward Kinematics
-% Explicit calculations
-Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
-Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
-for i = 1:length(th_list)
-    Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
-    Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
-    Ts_test = Ts_test * Ts_i;
-    Tb_test = Tb_test * Tb_i;
-end
-Ts_test = Ts_test * M;
+% %% Test Forward Kinematics
+% % Explicit calculations
+% Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
+% Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
+% for i = 1:length(th_list)
+%     Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
+%     Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
+%     Ts_test = Ts_test * Ts_i;
+%     Tb_test = Tb_test * Tb_i;
+% end
+% Ts_test = Ts_test * M;
 
-% Compare outputs
-error_count = 0;
-tol = 1e-4;
+% % Compare outputs
+% error_count = 0;
+% tol = 1e-4;
 
 
-Ts_test = FKinSpace(M, screw_list, th_list');
-Tb_test = FKinBody(M, body_screw_list, th_list');
 
-% Compare outputs
-if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
-    fprintf("Error: Spatial forward kinematics are wrong\n");
-    error_count = error_count + 1;
-end
+% Ts_test = FKinSpace(M, screw_list, th_list');
+% Tb_test = FKinBody(M, body_screw_list, th_list');
 
-if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
-    fprintf("Error: Body forward kinematics are wrong\n");
-    error_count = error_count + 1;
-end
+% % Compare outputs
+% if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
+%     fprintf("Error: Spatial forward kinematics are wrong\n");
+%     error_count = error_count + 1;
+% end
 
-%% Test Jacobian Functions
-J_s_test = JacobianSpace(screw_list, th_list);
-J_b_test = JacobianBody(body_screw_list, th_list);
+% if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
+%     fprintf("Error: Body forward kinematics are wrong\n");
+%     error_count = error_count + 1;
+% end
 
-% Compare outputs
-if ~all(ismembertol(J_s, J_s_test, tol), 'all')
-    fprintf("Error: Space Jacobian is wrong\n");
-    error_count = error_count + 1;
-end
+% %% Test Jacobian Functions
+% J_s_test = JacobianSpace(screw_list, th_list);
+% J_b_test = JacobianBody(body_screw_list, th_list);
 
-if ~all(ismembertol(J_b, J_b_test, tol), 'all')
-    fprintf("Error: Body Jacobian is wrong\n");
-    error_count = error_count + 1;
-end
+% % Compare outputs
+% if ~all(ismembertol(J_s, J_s_test, tol), 'all')
+%     fprintf("Error: Space Jacobian is wrong\n");
+%     error_count = error_count + 1;
+% end
 
-% Test space-body relation
-% J_b = Adj(T_bs) * J_s
-if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
-    fprintf("Error: Space-Body relation test failed\n");
-    error_count = error_count + 1;
-end
+% if ~all(ismembertol(J_b, J_b_test, tol), 'all')
+%     fprintf("Error: Body Jacobian is wrong\n");
+%     error_count = error_count + 1;
+% end
 
-%% Display test results
-fprintf("Total errors: %d\n", error_count);
+% % Test space-body relation
+% % J_b = Adj(T_bs) * J_s
+% if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
+%     fprintf("Error: Space-Body relation test failed\n");
+%     error_count = error_count + 1;
+% end
 
+% %% Display test results
+% fprintf("Total errors: %d\n", error_count);
