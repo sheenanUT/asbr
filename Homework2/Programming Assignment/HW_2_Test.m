@@ -161,5 +161,3 @@ singularity(J_s)       % display if robot is in singularity
 
 % %% Display test results
 % fprintf("Total errors: %d\n", error_count);
-
-disp('I hate this garbage');
