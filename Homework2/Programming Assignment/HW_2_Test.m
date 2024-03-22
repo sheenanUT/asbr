@@ -101,7 +101,7 @@ if verbose
 end
 
 %% determine if robot is in a singularity configuration
-singularity(J_s);       % display if robot is in singularity
+singularity(J_s)       % display if robot is in singularity
 
 
 
@@ -120,6 +120,7 @@ singularity(J_s);       % display if robot is in singularity
 % % Compare outputs
 % error_count = 0;
 % tol = 1e-4;
+
 
 
 % Ts_test = FKinSpace(M, screw_list, th_list');
