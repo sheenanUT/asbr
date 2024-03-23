@@ -105,15 +105,35 @@ end
 singularity(J_s);       % display if robot is in singularity
 
 %% Part g: Find and plot manipulability ellipsoids
-figure(3);
-% TODO: write a function separate from FK_space that plots the robot
+% TODO: maybe write a function separate from FK_space that plots the robot
 % TODO: figure out why J_s and J_b give different ellipsoids
+% Linear manipulability
+figure(3);
 FK_space(M, screw_list, th_list, q_list);
-ellipsoid_plot_linear(J_s, T_sb);
+ellipsoid_plot_linear(J_b, T_sb);   % Textbook says use body Jacobian
 
+% Angular manipulability
 figure(4);
 FK_space(M, screw_list, th_list, q_list);
-ellipsoid_plot_angular(J_s, T_sb);
+ellipsoid_plot_angular(J_b, T_sb);
+
+% Isotropy
+iso = J_isotropy(J_b);
+if verbose
+    fprintf("Isotropy = %d\n", iso);
+end
+
+% Condition
+cond = J_condition(J_b);
+if verbose
+    fprintf("Condition = %d\n", cond);
+end
+
+% Volume
+vol = J_volume(J_b);
+if verbose
+    fprintf("Volume = %d\n", vol);
+end
 
 % Compare outputs
 error_count = 0;
