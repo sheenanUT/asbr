@@ -73,6 +73,7 @@ body_q_list = body_q_list_h(1:3, :);
 %% Part a/b: Find the FK from spatial frame using FK_space.m
 % calculate and display the spacial forward kinematics
 figure(1);
+axis equal;
 T_sb = FK_space(M, screw_list, th_list, q_list);
 if verbose
     fprintf("Space-frame forward kinematics:\n");
@@ -102,6 +103,17 @@ end
 
 %% determine if robot is in a singularity configuration
 singularity(J_s);       % display if robot is in singularity
+
+%% Part g: Find and plot manipulability ellipsoids
+figure(3);
+% TODO: write a function separate from FK_space that plots the robot
+% TODO: figure out why J_s and J_b give different ellipsoids
+FK_space(M, screw_list, th_list, q_list);
+ellipsoid_plot_linear(J_s, T_sb);
+
+figure(4);
+FK_space(M, screw_list, th_list, q_list);
+ellipsoid_plot_angular(J_s, T_sb);
 
 % Compare outputs
 error_count = 0;
@@ -147,3 +159,4 @@ end
 %% Display test results
 fprintf("Total errors: %d\n", error_count);
 
+hold off;
