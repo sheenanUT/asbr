@@ -103,20 +103,6 @@ end
 %% determine if robot is in a singularity configuration
 singularity(J_s);       % display if robot is in singularity
 
-
-
-%% Test Forward Kinematics
-% Explicit calculations
-Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
-Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
-for i = 1:length(th_list)
-    Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
-    Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
-    Ts_test = Ts_test * Ts_i;
-    Tb_test = Tb_test * Tb_i;
-end
-Ts_test = Ts_test * M;
-
 % Compare outputs
 error_count = 0;
 tol = 1e-4;
