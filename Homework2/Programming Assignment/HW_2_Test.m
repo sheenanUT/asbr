@@ -102,7 +102,7 @@ if verbose
 end
 
 %% determine if robot is in a singularity configuration
-singularity(J_s)       % display if robot is in singularity
+singularity(J_s);       % display if robot is in singularity
 
 %% Part g: Find and plot manipulability ellipsoids
 % TODO: maybe write a function separate from FK_space that plots the robot
