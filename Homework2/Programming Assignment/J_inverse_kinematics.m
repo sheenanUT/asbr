@@ -34,7 +34,6 @@ function thetalistd = J_inverse_kinematics(M, Blist, thetalist_guess, Bqlist, Ts
         err_condition = (norm(Vb(1:3)) > errw) || (norm(Vb(4:6)) > errv);
 
         i = i+1;
-        fprintf("%d ; %d\n", norm(Vb(1:3)), norm(Vb(4:6)));
     end
     thetalistd = thetalist;
 end

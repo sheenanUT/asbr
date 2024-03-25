@@ -85,7 +85,7 @@ end
 
 %% Part c: Find the FK from body frame using FK_body.m
 figure(2);
-T_bs = FK_body(M, body_screw_list, th_list, body_q_list);
+T_bs = FK_body(M, body_screw_list, th_list, body_q_list, true);
 if verbose
     fprintf("Body-frame forward kinematics:\n");
     disp(T_bs);
