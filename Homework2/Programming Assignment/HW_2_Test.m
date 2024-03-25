@@ -116,7 +116,10 @@ if verbose
 end
 
 %% determine if robot is in a singularity configuration
-singularity(J_s)       % display if robot is in singularity
+if verbose
+    singularity(J_s);       % display if robot is in singularity
+end
+
 
 
 %% Part h: Inverse Kinematics Function
@@ -127,9 +130,9 @@ T_desired = [
     0.8529    0.5000   -0.1504    1.1796
     0         0         0    1.0000];
 
-theta_list_desired = J_inverse_kinematics(th_list, T_desired);       % calculate angles to for desired end-effector position
-
-
+theta_list_desired = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_desired);       % calculate angles to for desired end-effector position
+disp(theta_list_desired);
+disp(IKinBody(body_screw_list, M, T_desired, 0.01, 0.001));
 
 
 % %% Test Forward Kinematics
