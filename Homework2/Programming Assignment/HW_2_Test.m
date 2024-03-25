@@ -88,6 +88,7 @@ body_q_list = body_q_list_h(1:3, :);
 %% Part a/b: Find the FK from spatial frame using FK_space.m
 % calculate and display the spacial forward kinematics
 figure(1);
+axis equal;
 T_sb = FK_space(M, screw_list, th_list, q_list);
 if verbose
     fprintf("Space-frame forward kinematics:\n");
@@ -123,7 +124,7 @@ end
 
 
 %% Part h: Inverse Kinematics Function
-%control the robot from arbitrary configuration a to b
+% control the robot from arbitrary configuration a to b
 T_desired = [
     -0.4924    0.8660    0.0868    0.4696
     0.1736   -0.0000    0.9848    0.0373
@@ -131,63 +132,79 @@ T_desired = [
     0         0         0    1.0000];
 
 theta_list_desired = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_desired);       % calculate angles to for desired end-effector position
-disp(theta_list_desired);
 disp(IKinBody(body_screw_list, M, T_desired, 0.01, 0.001));
 
+%% Part g: Find and plot manipulability ellipsoids
+% TODO: maybe write a function separate from FK_space that plots the robot
+% TODO: figure out why J_s and J_b give different ellipsoids
+% Linear manipulability
+figure(3);
+FK_space(M, screw_list, th_list, q_list);
+ellipsoid_plot_linear(J_b, T_sb);   % Textbook says use body Jacobian
 
-% %% Test Forward Kinematics
-% % Explicit calculations
-% Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
-% Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
-% for i = 1:length(th_list)
-%     Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
-%     Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
-%     Ts_test = Ts_test * Ts_i;
-%     Tb_test = Tb_test * Tb_i;
-% end
-% Ts_test = Ts_test * M;
+% Angular manipulability
+figure(4);
+FK_space(M, screw_list, th_list, q_list);
+ellipsoid_plot_angular(J_b, T_sb);
 
-% % Compare outputs
-% error_count = 0;
-% tol = 1e-4;
+% Isotropy
+iso = J_isotropy(J_b);
+if verbose
+    fprintf("Isotropy = %d\n", iso);
+end
 
+% Condition
+cond = J_condition(J_b);
+if verbose
+    fprintf("Condition = %d\n", cond);
+end
 
-
-% Ts_test = FKinSpace(M, screw_list, th_list');
-% Tb_test = FKinBody(M, body_screw_list, th_list');
-
-% % Compare outputs
-% if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
-%     fprintf("Error: Spatial forward kinematics are wrong\n");
-%     error_count = error_count + 1;
-% end
-
-% if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
-%     fprintf("Error: Body forward kinematics are wrong\n");
-%     error_count = error_count + 1;
-% end
-
-% %% Test Jacobian Functions
-% J_s_test = JacobianSpace(screw_list, th_list);
-% J_b_test = JacobianBody(body_screw_list, th_list);
+% Volume
+vol = J_volume(J_b);
+if verbose
+    fprintf("Volume = %d\n", vol);
+end
 
 % % Compare outputs
-% if ~all(ismembertol(J_s, J_s_test, tol), 'all')
-%     fprintf("Error: Space Jacobian is wrong\n");
-%     error_count = error_count + 1;
-% end
+error_count = 0;
+tol = 1e-4;
 
-% if ~all(ismembertol(J_b, J_b_test, tol), 'all')
-%     fprintf("Error: Body Jacobian is wrong\n");
-%     error_count = error_count + 1;
-% end
 
-% % Test space-body relation
-% % J_b = Adj(T_bs) * J_s
-% if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
-%     fprintf("Error: Space-Body relation test failed\n");
-%     error_count = error_count + 1;
-% end
+Ts_test = FKinSpace(M, screw_list, th_list');
+Tb_test = FKinBody(M, body_screw_list, th_list');
+% Compare outputs
+if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
+    fprintf("Error: Spatial forward kinematics are wrong\n");
+    error_count = error_count + 1;
+end
 
-% %% Display test results
-% fprintf("Total errors: %d\n", error_count);
+if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
+    fprintf("Error: Body forward kinematics are wrong\n");
+    error_count = error_count + 1;
+end
+
+%% Test Jacobian Functions
+J_s_test = JacobianSpace(screw_list, th_list);
+J_b_test = JacobianBody(body_screw_list, th_list);
+
+% Compare outputs
+if ~all(ismembertol(J_s, J_s_test, tol), 'all')
+    fprintf("Error: Space Jacobian is wrong\n");
+    error_count = error_count + 1;
+end
+if ~all(ismembertol(J_b, J_b_test, tol), 'all')
+    fprintf("Error: Body Jacobian is wrong\n");
+    error_count = error_count + 1;
+end
+
+% Test space-body relation
+% J_b = Adj(T_bs) * J_s
+if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
+    fprintf("Error: Space-Body relation test failed\n");
+    error_count = error_count + 1;
+end
+
+%% Display test results
+fprintf("Total errors: %d\n", error_count);
+
+hold off;
