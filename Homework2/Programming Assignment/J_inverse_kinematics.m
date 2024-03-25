@@ -7,9 +7,9 @@
     % Bqlist: screw location vectors in body frame
 
 function thetalistd = J_inverse_kinematics(M, Blist, thetalist_guess, Bqlist, Tsd)
-    errw = 0.01;       % error value of angular velocity
+    errw = 0.001;       % error value of angular velocity
     errv = 0.001;       % error value of velocity 
-    max = 20;       % max iterations of algorithm
+    max = 50;       % max iterations of algorithm
 
     
     i = 0;
