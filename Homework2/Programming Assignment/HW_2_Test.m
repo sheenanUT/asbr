@@ -74,7 +74,7 @@ body_q_list = body_q_list_h(1:3, :);
 % calculate and display the spacial forward kinematics
 figure(1);
 axis equal;
-T_sb = FK_space(M, screw_list, th_list, q_list);
+T_sb = FK_space(M, screw_list, th_list, q_list, true);
 if verbose
     fprintf("Space-frame forward kinematics:\n");
     disp(T_sb);
@@ -105,16 +105,14 @@ end
 singularity(J_s);       % display if robot is in singularity
 
 %% Part g: Find and plot manipulability ellipsoids
-% TODO: maybe write a function separate from FK_space that plots the robot
-% TODO: figure out why J_s and J_b give different ellipsoids
 % Linear manipulability
 figure(3);
-FK_space(M, screw_list, th_list, q_list);
+FK_space(M, screw_list, th_list, q_list, true);
 ellipsoid_plot_linear(J_b, T_sb);   % Textbook says use body Jacobian
 
 % Angular manipulability
 figure(4);
-FK_space(M, screw_list, th_list, q_list);
+FK_space(M, screw_list, th_list, q_list, true);
 ellipsoid_plot_angular(J_b, T_sb);
 
 % Isotropy
@@ -135,13 +133,17 @@ if verbose
     fprintf("Volume = %d\n", vol);
 end
 
-% % Compare outputs
+%% Part i: Find IK using Jacobian transpose method
+thetas_d = J_transpose_kinematics(M, screw_list, zeros([1 6]), q_list, T_sb);
+
+%% Test Forward Kinematics Functions
 error_count = 0;
 tol = 1e-4;
 
 
 Ts_test = FKinSpace(M, screw_list, th_list');
 Tb_test = FKinBody(M, body_screw_list, th_list');
+
 % Compare outputs
 if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
     fprintf("Error: Spatial forward kinematics are wrong\n");
