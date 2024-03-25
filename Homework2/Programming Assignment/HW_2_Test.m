@@ -19,6 +19,9 @@ th5 = -90;
 th6 = 0;
 th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
 
+% Secondary pose for IK testing
+th_list_2 = [45; -90; 15; 30; -60; 45] * pi/180;
+
 % home configuration
 M = [
     1, 0, 0, L2+L3+L5+L6;
@@ -133,8 +136,14 @@ if verbose
     fprintf("Volume = %d\n", vol);
 end
 
+%% Part h: Find IK using numerical algorithm
+figure(5);
+T_s2 = FK_space(M, screw_list, th_list_2, q_list, true);
+thetas_d_NA = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_s2);
+FK_space(M, screw_list, thetas_d_NA, q_list, true);
+
 %% Part i: Find IK using Jacobian transpose method
-thetas_d = J_transpose_kinematics(M, screw_list, zeros([1 6]), q_list, T_sb);
+thetas_d_JT = J_transpose_kinematics(M, screw_list, zeros([1 6]), q_list, T_sb);
 
 %% Test Forward Kinematics Functions
 error_count = 0;
@@ -175,6 +184,8 @@ if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
     fprintf("Error: Space-Body relation test failed\n");
     error_count = error_count + 1;
 end
+
+%% Test Inverse Kinematics Functions
 
 %% Display test results
 fprintf("Total errors: %d\n", error_count);
