@@ -1,5 +1,5 @@
 %% find the forward kinematics in the body frame
-function T = FK_body(home_config, body_screw_list, theta_list, body_q_list)     
+function T = FK_body(home_config, body_screw_list, theta_list, body_q_list, plt)     
 %FK_BODY Calculates forward kinematics of robot in body frame
 %   Inputs:
 %       home_config = 4x4 transformation matrix representing zero-pose
@@ -9,6 +9,7 @@ function T = FK_body(home_config, body_screw_list, theta_list, body_q_list)
 %       theta_list = 1xn vector of joint angles for desired position
 %       q_list = 3xn matrix where the columns are the positions of the
 %           robot's joints in the zero-position, body-frame
+%       plt = Boolean, function generates 3D plot of robot if true
 %   Outputs:
 %       T = 4x4 transformation matrix representing final configuration of
 %           robot end effector in the body frame
@@ -51,21 +52,23 @@ function T = FK_body(home_config, body_screw_list, theta_list, body_q_list)
     end
     
     % Plot frames and screw axes in 3D
-    hold on;    % Plot all on 1 graph
-    plot_config(T);     % End effector position
-    plot_config(home_config);    % Body frame
-
-    for i = 1:length(body_screw_list)
-        % Plot screw axis rotation vectors
-        plot_vector(w_list_h(1:3, i)' / 2, q_list_h(1:3, i)', '-m');
-        % Plot arrow on positive end
-        plot_vector([0 0 0], q_list_h(1:3, i)' + w_list_h(1:3, i)' / 2,...
-            '-m^');
-        if i > 1
-            % Plot robot segments
-            plot_vector(q_list_h(1:3, i)' - q_list_h(1:3, i - 1)',...
-                        q_list_h(1:3, i - 1)', '-ko')
+    if plt
+        hold on;    % Plot all on 1 graph
+        plot_config(T);     % End effector position
+        plot_config(home_config);    % Body frame
+    
+        for i = 1:length(body_screw_list)
+            % Plot screw axis rotation vectors
+            plot_vector(w_list_h(1:3, i)' / 2, q_list_h(1:3, i)', '-m');
+            % Plot arrow on positive end
+            plot_vector([0 0 0], q_list_h(1:3, i)' + w_list_h(1:3, i)' / 2,...
+                '-m^');
+            if i > 1
+                % Plot robot segments
+                plot_vector(q_list_h(1:3, i)' - q_list_h(1:3, i - 1)',...
+                            q_list_h(1:3, i - 1)', '-ko');
+            end
         end
+        hold off;
     end
-    hold off;
 end

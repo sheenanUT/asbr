@@ -26,15 +26,6 @@ function Js = J_space(screw_list, theta_list)     % find the jacobian matrix in 
             exp_prod = exp_prod * expm(S*theta);    % exp_prod * e^[S_j]*th_j
         end
 
-        R = exp_prod(1:3, 1:3);     % rotation matrix of current exp_prod
-        p = exp_prod(1:3, 4);       % translation vector of current exp_prod
-
-        % translation vector of b from s under the se(3) form
-        p_skew = [
-            0, -p(3), p(2);
-            p(3), 0, -p(1);
-            -p(2), p(1), 0];
-
         % compute adjacent matrix of current exp_prod
         adj_exp = adj_transform(exp_prod);
         % compute the space jacobian column

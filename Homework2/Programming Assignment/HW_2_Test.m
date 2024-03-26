@@ -1,5 +1,6 @@
 % Toggle function readouts
 verbose = false;
+plt = true;
 
 %% Robot-Specific Variables
 % link dimensions in m
@@ -18,6 +19,12 @@ th4 = 0;
 th5 = -90;
 th6 = 0;
 th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
+
+% Secondary pose for IK testing
+th_list_2 = [45 -90 15 30 -60 45] * pi/180;
+
+% Secondary pose for IK testing
+th_list_2 = [45 -90 15 30 -60 45] * pi/180;
 
 % ensure proper joint angles
 if abs(th1) > 180
@@ -89,7 +96,7 @@ body_q_list = body_q_list_h(1:3, :);
 % calculate and display the spacial forward kinematics
 figure(1);
 axis equal;
-T_sb = FK_space(M, screw_list, th_list, q_list);
+T_sb = FK_space(M, screw_list, th_list, q_list, plt);
 if verbose
     fprintf("Space-frame forward kinematics:\n");
     disp(T_sb);
@@ -97,7 +104,7 @@ end
 
 %% Part c: Find the FK from body frame using FK_body.m
 figure(2);
-T_bs = FK_body(M, body_screw_list, th_list, body_q_list);
+T_bs = FK_body(M, body_screw_list, th_list, body_q_list, plt);
 if verbose
     fprintf("Body-frame forward kinematics:\n");
     disp(T_bs);
@@ -117,34 +124,17 @@ if verbose
 end
 
 %% determine if robot is in a singularity configuration
-if verbose
-    singularity(J_s);       % display if robot is in singularity
-end
-
-
-
-%% Part h: Inverse Kinematics Function
-% control the robot from arbitrary configuration a to b
-T_desired = [
-    -0.4924    0.8660    0.0868    0.4696
-    0.1736   -0.0000    0.9848    0.0373
-    0.8529    0.5000   -0.1504    1.1796
-    0         0         0    1.0000];
-
-theta_list_desired = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_desired);       % calculate angles to for desired end-effector position
-disp(IKinBody(body_screw_list, M, T_desired, 0.01, 0.001));
+singularity(J_s);       % display if robot is in singularity
 
 %% Part g: Find and plot manipulability ellipsoids
-% TODO: maybe write a function separate from FK_space that plots the robot
-% TODO: figure out why J_s and J_b give different ellipsoids
 % Linear manipulability
 figure(3);
-FK_space(M, screw_list, th_list, q_list);
+FK_space(M, screw_list, th_list, q_list, plt);
 ellipsoid_plot_linear(J_b, T_sb);   % Textbook says use body Jacobian
 
 % Angular manipulability
 figure(4);
-FK_space(M, screw_list, th_list, q_list);
+FK_space(M, screw_list, th_list, q_list, plt);
 ellipsoid_plot_angular(J_b, T_sb);
 
 % Isotropy
@@ -165,13 +155,22 @@ if verbose
     fprintf("Volume = %d\n", vol);
 end
 
-% % Compare outputs
+%% Part h: Find IK using numerical algorithm
+T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
+thetas_d_NA = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_s2);
+
+%% Part i: Find IK using Jacobian transpose method
+T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
+thetas_d_JT = J_transpose_kinematics(M, body_screw_list, th_list, body_q_list, T_s2);
+
+%% Test Forward Kinematics Functions
 error_count = 0;
 tol = 1e-4;
 
-
+% Generate test outputs with MR functions
 Ts_test = FKinSpace(M, screw_list, th_list');
 Tb_test = FKinBody(M, body_screw_list, th_list');
+
 % Compare outputs
 if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
     fprintf("Error: Spatial forward kinematics are wrong\n");
@@ -204,7 +203,23 @@ if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
     error_count = error_count + 1;
 end
 
+%% Test Inverse Kinematics Functions
+% Performing FK on output of IK should yield original transformation
+% Numerical algorithm
+T_s2_test_NA = FK_space(M, screw_list, thetas_d_NA, q_list, false);
+if ~all(ismembertol(T_s2, T_s2_test_NA, tol), 'all')
+    fprintf("Error: Numerical inverse kinematics are wrong\n");
+    error_count = error_count + 1;
+end
+
+% Jacobian transpose algorithm
+T_s2_test_JT = FK_space(M, screw_list, thetas_d_JT, q_list, false);
+if ~all(ismembertol(T_s2, T_s2_test_JT, tol), 'all')
+    fprintf("Error: Jacobian Transpose inverse kinematics are wrong\n");
+    error_count = error_count + 1;
+end
+
 %% Display test results
 fprintf("Total errors: %d\n", error_count);
 
-hold off;
+hold off;   % Close any open plots
