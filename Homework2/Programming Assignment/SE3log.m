@@ -1,12 +1,19 @@
-% matrix log of SE(3) or special euclidean matrices to lie algebra form se(3)
-% without th constant
-% T -> [S]
-% Input:
-%     T: transformation matrix
-% Output:
-%   se3matrix: 4x4 matrix in se3 form
-%   th: angle of rotation
 function [se3matrix,th] = SE3log(T)
+%SE3LOG Matrix log of SE(3) or special euclidean matrices to lie algebra
+%form se(3) without th constant
+% T -> [S]
+%   Input:
+%       T: 4x4 transformation matrix
+%   Output:
+%       se3matrix: 4x4 matrix in se3 form
+%       th: angle of rotation
+
+    % Input validation
+    % T must be transformation matrix
+    if ~is_transform(T)
+        error("Input T is not a valid transformation matrix");
+    end
+    
     % pose
     R = T(1:3, 1:3);       % rotation matrix of T
     p = T(1:3, 4);     % location vector of T

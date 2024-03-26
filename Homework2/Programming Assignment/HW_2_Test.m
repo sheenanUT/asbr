@@ -150,7 +150,7 @@ if verbose
 end
 
 % Volume
-vol = J_volume(J_b);
+vol = J_ellipsoid_volume(J_b);
 if verbose
     fprintf("Volume = %d\n", vol);
 end

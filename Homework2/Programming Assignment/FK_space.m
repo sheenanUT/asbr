@@ -16,16 +16,33 @@ function T = FK_space(home_config, screw_list, theta_list, q_list, plt)
 %   Function also produces a 3D graph of the zero-pose frame, end-effector
 %   frame, and joint screw axes
 
+    n = length(theta_list);
+
+    % Validate inputs
+    % home_config must be valid transform
+    if ~is_transform(home_config)
+        error("Input home_config is not a valid transformation matrix");
+    % screw_list should be 6xn
+    elseif ~isequal(size(screw_list), [6 n])
+        error("Input screw_list is not a 6xn matrix");
+    % theta_list should be 1xn
+    elseif ~isequal(size(theta_list), [1 n])
+        error("Input theta_list is not a 1xn vector");
+    % q_list should be 3xn
+    elseif ~isequal(size(q_list), [3 n])
+        error("Input q_list is not a 3xn matrix");
+    end
+
     % initialize list as cell array to separate each 4x4 matrix for all
     % screws in se(3) form
-    S_list = cell(1, length(screw_list));
+    S_list = cell(1, n);
 
     % rotation vectors in homogeneous form
-    w_list_h = zeros(4, length(screw_list));
+    w_list_h = zeros(4, n);
     % position vectors in homogeneous form
-    q_list_h = [q_list; ones(1, length(screw_list))];
+    q_list_h = [q_list; ones(1, n)];
 
-    for i=1:length(screw_list)
+    for i=1:n
         screw = screw_list(:, i);   % select screw axis of column i
         w = screw(1:3);     % rotation vector of selected screw
 
@@ -37,7 +54,7 @@ function T = FK_space(home_config, screw_list, theta_list, q_list, plt)
 
     % compute the spacial forward kinematics
     T = eye(4);      % initialize the equation a 4x4 identity matrix
-    for i = 1:length(screw_list)
+    for i = 1:n
         S = S_list{i};      % use the current se(3) representation of the screw
         theta = theta_list(i);      % use current angle value
 
@@ -57,7 +74,7 @@ function T = FK_space(home_config, screw_list, theta_list, q_list, plt)
         plot_config(T);     % End effector position
         plot_frame(eye(3), [0 0 0]);    % Space frame
     
-        for i = 1:length(screw_list)
+        for i = 1:n
             % Plot screw axis rotation vectors
             plot_vector(w_list_h(1:3, i)' / 2, q_list_h(1:3, i)', '-m');
             % Plot arrow on positive end

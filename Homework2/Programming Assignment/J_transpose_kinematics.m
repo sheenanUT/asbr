@@ -1,4 +1,5 @@
-function [thetas_d] = J_transpose_kinematics(home_config, body_screw_list, theta_list, body_q_list, T_d)
+function [thetas_d] = J_transpose_kinematics(home_config, ...
+                      body_screw_list, theta_list, body_q_list, T_d)
 %J_TRANSPOSE_KINEMATICS Calculates inverse kinematics using Jacobian
 %transpose method
 %   Inputs:
@@ -14,6 +15,25 @@ function [thetas_d] = J_transpose_kinematics(home_config, body_screw_list, theta
 %   Outputs:
 %       thetas_d = nx1 vector of joint angles that will move the end
 %       effector to the desired position
+
+n = length(theta_list);
+
+% Validate inputs
+% home_config and T_d must be transformation matrices
+if ~is_transform(home_config)
+    error("Input home_config is not a valid transformation matrix");
+elseif ~is_transform(T_d)
+    error("Input T_d is not a valid transformation matrix");
+% body_screw_list must be 6xn
+elseif ~isequal(size(body_screw_list), [6 n])
+    error("Input body_screw_list is not a 6xn matrix");
+% theta_list must be 1xn
+elseif ~isequal(size(theta_list), [1 n])
+    error("Input theta_list is not a 1xn vector");
+% body_q_list must be 3xn
+elseif ~isequal(size(body_q_list), [3 n])
+    error("Input body_q_list is not a 3xn matrix");
+end
 
 % Set initial error to 1 for loop logic (see below)
 err = 1;

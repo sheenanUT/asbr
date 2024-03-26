@@ -7,6 +7,12 @@ function [screw, theta] = t2screw(T)
 %       theta = scalar rotation angle, rad
 %   [screw * theta] transforms from origin to T
 
+% Input validation
+% T must be transformation matrix
+if ~is_transform(T)
+    error("Input T is not a valid transformation matrix");
+end
+
 R = T(1:3, 1:3);
 p = T(1:3, 4);
 
