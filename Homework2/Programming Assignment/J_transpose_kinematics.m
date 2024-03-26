@@ -44,7 +44,12 @@ errw = 1e-4;       % error value of angular velocity
 errv = 1e-4;       % error value of velocity
 err_cond = true;   % condition for loop to continue
 
-while err_cond
+% Maximum iterations
+% Large number because this algorithm can be slow
+i = 0;
+i_max = 1e5;
+
+while err_cond && i < i_max
     if length(err) ~= 1   % Skip this section in first loop
         % Samuel Buss's formula, remember to cite
         alpha = dot(err, J_c * J_c' * err) /...
@@ -70,7 +75,14 @@ while err_cond
 
     % Determine whether condition is met
     err_cond = norm(err(1:3)) > errw || norm(err(4:6)) > errv;
+
+    i = i + 1;
 end
 
 thetas_d = theta_list;
+
+if i == i_max
+    fprintf("Error: Jacobian transpose failed to converge\n");
+end
+
 end

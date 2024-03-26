@@ -34,7 +34,7 @@ function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist,...
 
     errw = 1e-4;       % error value of angular velocity
     errv = 1e-4;       % error value of velocity 
-    max = 20;       % max iterations of algorithm
+    max = 50;       % max iterations of algorithm
 
     i = 0;
     thetalist = thetalist_guess;
@@ -68,6 +68,10 @@ function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist,...
         i = i+1;
     end
     thetalistd = thetalist;
+
+    if i == max
+        fprintf("Error: Numerical algorithm failed to converge");
+    end
 
     % Redundancy resolution to get joint velocities
     Tbs = FK_body(M, Blist, thetalist_guess, Bqlist, false);

@@ -1,5 +1,5 @@
-% Toggle function readouts
-verbose = true;
+verbose = true;     % Toggle function readouts
+rand_pose = false;   % Toggle randomized poses
 
 %% Robot-Specific Variables
 % link dimensions in m
@@ -11,33 +11,56 @@ L5 = 780 * 10^-3;
 L6 = 215 * 10^-3;
 
 % joint angles in degrees
-th1 = 0;
-th2 = -120;
-th3 = 90;
-th4 = 0;
-th5 = -90;
-th6 = 0;
+if rand_pose
+    % Generate random angles within joint ranges
+    th1 = rand() * 360 - 180;
+    th2 = rand() * 190 - 145;
+    th3 = rand() * 180 - 30;
+    th4 = rand() * 700 - 350;
+    th5 = rand() * 250 - 125;
+    th6 = rand() * 700 - 350;
+
+    % Generate second pose for IK
+    th1b = rand() * 360 - 180;
+    th2b = rand() * 190 - 145;
+    th3b = rand() * 180 - 30;
+    th4b = rand() * 700 - 350;
+    th5b = rand() * 250 - 125;
+    th6b = rand() * 700 - 350;
+else
+    % Generic starting pose
+    th1 = 0;
+    th2 = -120;
+    th3 = 90;
+    th4 = 0;
+    th5 = -90;
+    th6 = 0;
+
+    % Generic second pose for IK
+    th1b = 45;
+    th2b = -90;
+    th3b = 15;
+    th4b = 30;
+    th5b = -60;
+    th6b = 45;
+
+    % ensure proper joint angles
+    if abs(th1) > 180
+        disp('Angle 1 out of range. Proper range: ±180°'); end
+    if th2<-145 || 45<th2
+        disp('Angle 2 out of range. Proper range: -145° / 45°'); end
+    if th3<-30 || 150<th3
+        disp('Angle 3 out of range. Proper range: -30° / 150°'); end
+    if abs(th4) > 350
+        disp('Angle 4 out of range. Proper range: ±350°'); end
+    if abs(th5) > 125
+        disp('Angle 5 out of range. Proper range: ±125°'); end
+    if abs(th6) > 350
+        disp('Angle 6 out of range. Proper range: ±350°'); end
+end
+
 th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
-
-% Secondary pose for IK testing
-th_list_2 = [45 -90 15 30 -60 45] * pi/180;
-
-% Secondary pose for IK testing
-th_list_2 = [45 -90 15 30 -60 45] * pi/180;
-
-% ensure proper joint angles
-if abs(th1) > 180
-    disp('Angle 1 out of range. Proper range: ±180°'); end
-if th2<-145 || 45<th2
-    disp('Angle 2 out of range. Proper range: -145° / 45°'); end
-if th3<-30 || 150<th3
-    disp('Angle 3 out of range. Proper range: -30° / 150°'); end
-if abs(th4) > 350
-    disp('Angle 4 out of range. Proper range: ±350°'); end
-if abs(th5) > 125
-    disp('Angle 5 out of range. Proper range: ±125°'); end
-if abs(th6) > 350
-    disp('Angle 6 out of range. Proper range: ±350°'); end
+th_list_2 = [th1b th2b th3b th4b th5b th6b] * pi/180;
 
 % home configuration
 M = [
@@ -243,6 +266,7 @@ theta_diff_NA = thetas_d_NA - th_list;  % Displacement of each joint angle
 for i = 1:length(theta_diff_NA)
     if sign(thVelList(i)) ~= sign(theta_diff_NA(i))
         fprintf("Error: Velocity in wrong direction\n")
+        error_count = error_count + 1;
     end
 end
 
