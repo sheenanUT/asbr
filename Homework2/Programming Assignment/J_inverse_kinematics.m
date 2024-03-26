@@ -9,8 +9,8 @@
     % TODO: Return an error message if starting config is singular
 
 function thetalistd = J_inverse_kinematics(M, Blist, thetalist_guess, Bqlist, Tsd)
-    errw = 0.01;       % error value of angular velocity
-    errv = 0.001;       % error value of velocity 
+    errw = 1e-4;       % error value of angular velocity
+    errv = 1e-4;       % error value of velocity 
     max = 20;       % max iterations of algorithm
 
     
