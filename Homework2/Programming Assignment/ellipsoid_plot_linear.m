@@ -2,7 +2,7 @@ function [semi_axes] = ellipsoid_plot_linear(J, T)
 %ELLIPSOID_PLOT_LINEAR Calculates & plots linear manipulability ellipsoid
 % of robot
 %   Inputs:
-%       J = 6xn Jacobian matrix (space or body)
+%       J = 6xn body Jacobian matrix
 %       T = 4x4 configuration of end effector
 %   Outputs:
 %       semi_axes = 3x3 matrix where each column is one of the semi-axes
