@@ -1,19 +1,24 @@
-%% find the inverse kinematics using an iterative numerical algorithm
+% find the inverse kinematics using an iterative numerical algorithm
+% and Find joint velocities to maximize manipulability measure and move
+% away from singularities
 % Input:
-    % Tsd: desired pose of end effector in spaceframe
-    % thetalist_guess: initial guess of joint angles
-    % M: home configuration of end effector
-    % Blist: list of screws in body frame
-    % Bqlist: screw location vectors in body frame
+%   Tsd: desired pose of end effector in spaceframe
+%   thetalist_guess: initial guess of joint angles
+%   M: home configuration of end effector
+%   Blist: list of screws in body frame
+%   Bqlist: screw location vectors in body frame
+% Output:
+%     thetalistd: list of joint angles for end-effector to reach desired pose
+%     thVellist: list of joint angle velocities to maximize manipulability
+%     and move away from singularities
 
     % TODO: Return an error message if starting config is singular
 
-function thetalistd = J_inverse_kinematics(M, Blist, thetalist_guess, Bqlist, Tsd)
+function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist, thetalist_guess, Bqlist, Tsd)
     errw = 1e-4;       % error value of angular velocity
     errv = 1e-4;       % error value of velocity 
     max = 20;       % max iterations of algorithm
 
-    
     i = 0;
     thetalist = thetalist_guess;
     Tbs = FK_body(M, Blist, thetalist, Bqlist, false);       % find the FK in body frame
@@ -36,4 +41,8 @@ function thetalistd = J_inverse_kinematics(M, Blist, thetalist_guess, Bqlist, Ts
         i = i+1;
     end
     thetalistd = thetalist;
+
+    % Redundancy resolution to get joint velocities
+    Tbs = FK_body(M, Blist, thetalist_guess, Bqlist, false);
+    thVelList = redundancy_resolution(Blist, thetalist_guess, inv(Tbs) * Tsd);
 end
