@@ -137,9 +137,10 @@ if verbose
     fprintf("Volume = %d\n", vol);
 end
 
-%% Part h: Find IK using numerical algorithm
+%% Part h/j: Find IK using numerical algorithm
+% Also includes redundancy resolution
 T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
-thetas_d_NA = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_s2);
+[thetas_d_NA, thVelList] = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_s2);
 
 %% Part i: Find IK using Jacobian transpose method
 T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
@@ -199,6 +200,16 @@ T_s2_test_JT = FK_space(M, screw_list, thetas_d_JT, q_list, false);
 if ~all(ismembertol(T_s2, T_s2_test_JT, tol), 'all')
     fprintf("Error: Jacobian Transpose inverse kinematics are wrong\n");
     error_count = error_count + 1;
+end
+
+%% Test redundancy resolution function
+% Difficult to show that these joint velocities are optimal
+% Can at least demonstrate that they all move in the right direction
+theta_diff_NA = thetas_d_NA - th_list;  % Displacement of each joint angle
+for i = 1:length(theta_diff_NA)
+    if sign(thVelList(i)) ~= sign(theta_diff_NA(i))
+        fprintf("Error: Velocity in wrong direction\n")
+    end
 end
 
 %% Display test results
