@@ -1,6 +1,5 @@
 % Toggle function readouts
-verbose = false;
-plt = true;
+verbose = true;
 
 %% Robot-Specific Variables
 % link dimensions in m
@@ -96,7 +95,8 @@ body_q_list = body_q_list_h(1:3, :);
 % calculate and display the spacial forward kinematics
 figure(1);
 axis equal;
-T_sb = FK_space(M, screw_list, th_list, q_list, plt);
+T_sb = FK_space(M, screw_list, th_list, q_list, true);
+title("Space-Frame Forward Kinematics");
 if verbose
     fprintf("Space-frame forward kinematics:\n");
     disp(T_sb);
@@ -104,7 +104,8 @@ end
 
 %% Part c: Find the FK from body frame using FK_body.m
 figure(2);
-T_bs = FK_body(M, body_screw_list, th_list, body_q_list, plt);
+T_bs = FK_body(M, body_screw_list, th_list, body_q_list, true);
+title("Body-Frame Forward Kinematics");
 if verbose
     fprintf("Body-frame forward kinematics:\n");
     disp(T_bs);
@@ -124,18 +125,20 @@ if verbose
 end
 
 %% determine if robot is in a singularity configuration
-singularity(J_s);       % display if robot is in singularity
+singularity(J_s, true);       % display if robot is in singularity
 
 %% Part g: Find and plot manipulability ellipsoids
 % Linear manipulability
 figure(3);
-FK_space(M, screw_list, th_list, q_list, plt);
+FK_space(M, screw_list, th_list, q_list, true);
 ellipsoid_plot_linear(J_b, T_sb);   % Textbook says use body Jacobian
+title("Linear Manipulability Ellipsoid");
 
 % Angular manipulability
 figure(4);
-FK_space(M, screw_list, th_list, q_list, plt);
+FK_space(M, screw_list, th_list, q_list, true);
 ellipsoid_plot_angular(J_b, T_sb);
+title("Angular Manipulability Ellipsoid");
 
 % Isotropy
 iso = J_isotropy(J_b);
@@ -158,11 +161,23 @@ end
 %% Part h/j: Find IK using numerical algorithm
 % Also includes redundancy resolution
 T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
-[thetas_d_NA, thVelList] = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_s2);
+[thetas_d_NA, thVelList] = J_inverse_kinematics(M, body_screw_list,...
+                           th_list, body_q_list, T_s2);
+if verbose
+    fprintf("Numerical inverse kinematics:\n");
+    disp(thetas_d_NA);
+    fprintf("Optimal joint velocities:\n");
+    disp(thVelList');
+end
 
 %% Part i: Find IK using Jacobian transpose method
 T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
-thetas_d_JT = J_transpose_kinematics(M, body_screw_list, th_list, body_q_list, T_s2);
+thetas_d_JT = J_transpose_kinematics(M, body_screw_list, th_list,...
+              body_q_list, T_s2);
+if verbose
+    fprintf("Jacobian transpose inverse kinematics:\n");
+    disp(thetas_d_JT);
+end
 
 %% Test Forward Kinematics Functions
 error_count = 0;
@@ -192,6 +207,7 @@ if ~all(ismembertol(J_s, J_s_test, tol), 'all')
     fprintf("Error: Space Jacobian is wrong\n");
     error_count = error_count + 1;
 end
+
 if ~all(ismembertol(J_b, J_b_test, tol), 'all')
     fprintf("Error: Body Jacobian is wrong\n");
     error_count = error_count + 1;

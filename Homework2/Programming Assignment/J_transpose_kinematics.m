@@ -65,8 +65,8 @@ while err_cond
 
     % Compute error vector
     T_err = inv(T_c) * T_d;
-    [screw, th] = t2screw(T_err);
-    err = screw * th;
+    [se3, th] = SE3log(T_err);
+    err = se3toR6(se3) * th;
 
     % Determine whether condition is met
     err_cond = norm(err(1:3)) > errw || norm(err(4:6)) > errv;

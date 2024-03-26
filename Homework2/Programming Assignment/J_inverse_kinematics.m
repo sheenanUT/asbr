@@ -43,7 +43,7 @@ function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist,...
     Tbs = FK_body(M, Blist, thetalist, Bqlist, false);
 
     % Algorithm fails if initial position is singular
-    if singularity(J_body(Blist, thetalist))
+    if singularity(J_body(Blist, thetalist), false)
         error("Cannot calculate IK from singular position");
     end
 
