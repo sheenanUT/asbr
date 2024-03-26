@@ -131,8 +131,6 @@ T_desired = [
     0         0         0    1.0000];
 
 theta_list_desired = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_desired);       % calculate angles to for desired end-effector position
-disp(theta_list_desired);
-disp(IKinBody(body_screw_list, M, T_desired, 0.01, 0.001));
 
 
 % %% Test Forward Kinematics
