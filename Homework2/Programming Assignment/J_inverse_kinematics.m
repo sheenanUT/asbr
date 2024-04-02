@@ -68,7 +68,7 @@ function [thetalistd, thVelList, thetalist_array] = J_inverse_kinematics(M, Blis
         % err_condition: error condition | ||omega||>errw or ||v||>errv
         err_condition = (norm(Vb(1:3)) > errw) || (norm(Vb(4:6)) > errv);
 
-        thetalist_array = [thetalist_array, thetalist];     % concatenate thetalist
+        thetalist_array = [thetalist_array; thetalist];     % concatenate thetalist
 
         i = i+1;
     end

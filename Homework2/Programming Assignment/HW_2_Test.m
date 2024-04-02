@@ -195,7 +195,7 @@ end
 
 %% Part i: Find IK using Jacobian transpose method
 T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
-thetas_d_JT = J_transpose_kinematics(M, body_screw_list, th_list,...
+[thetas_d_JT, thetas_d_JT_array] = J_transpose_kinematics(M, body_screw_list, th_list,...
               body_q_list, T_s2);
 if verbose
     fprintf("Jacobian transpose inverse kinematics:\n");
