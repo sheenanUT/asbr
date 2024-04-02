@@ -1,4 +1,4 @@
-function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist,...
+function [thetalistd, thVelList, thetalist_array] = J_inverse_kinematics(M, Blist,...
                                    thetalist_guess, Bqlist, Tsd)
 %J_INVERSE_KINEMATICS finds a robot's inverse kinematics using an iterative
 %numerical algorithm, and find optimal joint velocities
@@ -12,6 +12,7 @@ function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist,...
 %       thetalistd: list of joint angles for end-effector to reach desired pose
 %       thVellist: list of joint angle velocities to maximize manipulability
 %       and move away from singularities
+%       thetalist_array: array of joint angles of each iteration of thetalist
     
     n = length(thetalist_guess);
 
@@ -38,6 +39,8 @@ function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist,...
 
     i = 0;
     thetalist = thetalist_guess;
+    thetalist_array = thetalist;
+    
 
     % find the FK in body frame
     Tbs = FK_body(M, Blist, thetalist, Bqlist, false);
@@ -64,6 +67,8 @@ function [thetalistd, thVelList] = J_inverse_kinematics(M, Blist,...
         Vb = se3toR6(S_se3) * th;
         % err_condition: error condition | ||omega||>errw or ||v||>errv
         err_condition = (norm(Vb(1:3)) > errw) || (norm(Vb(4:6)) > errv);
+
+        thetalist_array = [thetalist_array, thetalist];     % concatenate thetalist
 
         i = i+1;
     end
