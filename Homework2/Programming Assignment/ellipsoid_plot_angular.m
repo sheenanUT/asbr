@@ -1,12 +1,21 @@
 function [semi_axes] = ellipsoid_plot_angular(J, T)
 %ELLIPSOID_PLOT_LINEAR Calculates & plots angular manipulability ellipsoid
-% of robot
+%of robot
 %   Inputs:
 %       J = 6xn Jacobian matrix (space or body)
 %       T = 4x4 configuration of end effector
 %   Outputs:
 %       semi_axes = 3x3 matrix where each column is one of the semi-axes
 %       of the ellipsoid
+
+% Validate inputs
+% J should have 6 rows
+if size(J, 1) ~= 6
+    error("Input J is not a valid Jacobian matrix");
+% T must be a valid transformation
+elseif ~is_transform(T)
+    error("Input T is not a valid transformation matrix");
+end
 
 Jw = J(1:3, :);    % Angular Jacobian, top 3 rows
 A = Jw * Jw';   % 3x3 matrix

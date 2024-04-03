@@ -6,6 +6,12 @@ function [cond] = J_condition(J)
 %       cond = scalar condition measure
 %   Condition is the square of isotropy. Smaller values are better.
 
+% Validate inputs
+% J should have 6 rows
+if size(J, 1) ~= 6
+    error("Input J is not a valid Jacobian matrix");
+end
+
 iso = J_isotropy(J);
 cond = iso^2;
 end

@@ -1,12 +1,28 @@
-% Find joint velocities to maximize manipulability measure and move away from singularities
-% Input:
-%     Blist: list of screws in {b} frame
-%     thetalist: list of joint angles
-%     Tbd: transformation matrix of desired pose in {b}
-% Output:
-%     thVelList: list of joint velocities
 function thVelList = redundancy_resolution(Blist, thetalist, Tbd)
-    difference = 1e-4;
+%REDUNDANCY_RESOLUTION Find joint velocities to maximize manipulability
+%measure and move away from singularities
+%   Inputs:
+%       Blist: 6xn list of screws in {b} frame
+%       thetalist: 1xn list of joint angles
+%       Tbd: 4x4 transformation matrix of desired pose in {b}
+%   Output:
+%       thVelList: 1xn list of joint velocities
+    
+    n = length(thetalist);
+
+    % Validate inputs
+    % Blist must be 6xn
+    if ~isequal(size(Blist), [6 n])
+        error("Input Blist is not a 6xn matrix");
+    % thetalist_guess must be 1xn
+    elseif ~isequal(size(thetalist), [1 n])
+        error("Input thetalist is not a 1xn vector");
+    % Tbd must be a transformation matrix
+    elseif ~is_transform(Tbd)
+        error("Input Tbd is not a valid transformation matrix");
+    end
+
+    difference = 1e-3;
     k0 = 1;        % kinematic constant
     q = thetalist;      % q_i
 
@@ -16,7 +32,7 @@ function thVelList = redundancy_resolution(Blist, thetalist, Tbd)
 
     % Get current manipulability
     J = J_body(Blist, q);
-    w_q = sqrt(det(J * J'));        % w(q)^i
+    w_q = sqrt(abs(det(J * J')));        % w(q)^i
 
     % Find dw/dq
     % w(q) is a scalar function of vector q
@@ -29,7 +45,7 @@ function thVelList = redundancy_resolution(Blist, thetalist, Tbd)
 
         % Get incremented manipulability
         J_next = J_body(Blist, q_next);     % J_i+1
-        w_q_next = sqrt(det(J_next * J_next'));     % w(q)^i+1
+        w_q_next = sqrt(abs(det(J_next * J_next')));     % w(q)^i+1
 
         % calculate differentiation, finite difference
         % w(q)^i+1 - w(q) / q_i+1 - q_i
