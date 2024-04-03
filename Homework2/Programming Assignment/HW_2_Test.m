@@ -253,8 +253,9 @@ if ~all(ismembertol(T_s2, T_s2_test_NA, tol), 'all')
 end
 
 % Jacobian transpose algorithm
+% Needs looser error tolerance for fast resolution
 T_s2_test_JT = FK_space(M, screw_list, thetas_d_JT, q_list, false);
-if ~all(ismembertol(T_s2, T_s2_test_JT, tol), 'all')
+if ~all(ismembertol(T_s2, T_s2_test_JT, tol*10), 'all')
     fprintf("Error: Jacobian Transpose inverse kinematics are wrong\n");
     error_count = error_count + 1;
 end

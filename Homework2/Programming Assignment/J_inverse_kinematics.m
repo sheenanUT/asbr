@@ -61,7 +61,8 @@ function [thetalistd, thVelList, thetalist_array] = J_inverse_kinematics(M, Blis
     %   Condition: loop while error condition is true and only [max] times
     while err_condition && i<max
         % set new joint angle list
-        thetalist = thetalist + (JacobianPInv(J_body(Blist, thetalist)) * Vb)';
+        %thetalist = thetalist + (JacobianPInv(J_body(Blist, thetalist)) * Vb)';
+        thetalist = thetalist + redundancy_resolution(Blist, thetalist, inv(Tbs) * Tsd)';
         Tbs = FK_body(M, Blist, thetalist, Bqlist, false);       % find the FK in body frame
         [S_se3, th] = SE3log(inv(Tbs)*Tsd);        % screw in body frame
         Vb = se3toR6(S_se3) * th;
