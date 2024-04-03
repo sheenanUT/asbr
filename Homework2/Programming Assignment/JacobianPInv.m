@@ -10,9 +10,9 @@ function JPinv = JacobianPInv(JacobianMatrix)
     J = JacobianMatrix;
     Jt = transpose(JacobianMatrix);
 
-    if m == n
+    if m == n && det(J) ~= 0
         JPinv = inv(J);        % inverse of jacobian matrix
-    elseif n > m
+    elseif n > m || det(J) == 0
         JPinv = Jt * inv(J*Jt);
     elseif n < m
         JPinv = inv(Jt*J) * Jt;

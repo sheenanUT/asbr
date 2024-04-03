@@ -80,7 +80,12 @@ function T = FK_space(home_config, screw_list, theta_list, q_list, plt)
             % Plot arrow on positive end
             plot_vector([0 0 0], q_list_h(1:3, i)' + w_list_h(1:3, i)' / 2,...
                 '-m^');
-            if i > 1
+            if i == 2
+                % Plot right-angle for first segment
+                plot_vector(-q_list_h(1:3, 1)', q_list_h(1:3, 1)', '-k');
+                plot_vector(q_list_h(1:3, 2)', [0 0 0], '-k')
+                plot_vector([0 0 0], q_list_h(1:3, 1)', '-ko')
+            elseif i > 2
                 % Plot robot segments
                 plot_vector(q_list_h(1:3, i)' - q_list_h(1:3, i - 1)',...
                             q_list_h(1:3, i - 1)', '-ko')
