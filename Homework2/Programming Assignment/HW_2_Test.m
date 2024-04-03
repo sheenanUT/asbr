@@ -1,5 +1,5 @@
-% Toggle function readouts
-verbose = false;
+verbose = true;     % Toggle function readouts
+rand_pose = false;   % Toggle randomized poses
 
 %% Robot-Specific Variables
 % link dimensions in m
@@ -11,27 +11,56 @@ L5 = 780 * 10^-3;
 L6 = 215 * 10^-3;
 
 % joint angles in degrees
-th1 = 0;
-th2 = -120;
-th3 = 90;
-th4 = 0;
-th5 = -90;
-th6 = 0;
-th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
+if rand_pose
+    % Generate random angles within joint ranges
+    th1 = rand() * 360 - 180;
+    th2 = rand() * 190 - 145;
+    th3 = rand() * 180 - 30;
+    th4 = rand() * 700 - 350;
+    th5 = rand() * 250 - 125;
+    th6 = rand() * 700 - 350;
 
-% ensure proper joint angles
-if abs(th1) > 180
-    disp('Angle 1 out of range. Proper range: ±180°'); end
-if th2<-145 || 45<th2
-    disp('Angle 2 out of range. Proper range: -145° / 45°'); end
-if th3<-30 || 150<th3
-    disp('Angle 3 out of range. Proper range: -30° / 150°'); end
-if abs(th4) > 350
-    disp('Angle 4 out of range. Proper range: ±350°'); end
-if abs(th5) > 125
-    disp('Angle 5 out of range. Proper range: ±125°'); end
-if abs(th6) > 350
-    disp('Angle 6 out of range. Proper range: ±350°'); end
+    % Generate second pose for IK
+    th1b = rand() * 360 - 180;
+    th2b = rand() * 190 - 145;
+    th3b = rand() * 180 - 30;
+    th4b = rand() * 700 - 350;
+    th5b = rand() * 250 - 125;
+    th6b = rand() * 700 - 350;
+else
+    % Generic starting pose
+    th1 = 0;
+    th2 = -120;
+    th3 = 90;
+    th4 = 0;
+    th5 = -90;
+    th6 = 0;
+
+    % Generic second pose for IK
+    th1b = 45;
+    th2b = -90;
+    th3b = 15;
+    th4b = 30;
+    th5b = -60;
+    th6b = 45;
+
+    % ensure proper joint angles
+    if abs(th1) > 180
+        disp('Angle 1 out of range. Proper range: ±180°'); end
+    if th2<-145 || 45<th2
+        disp('Angle 2 out of range. Proper range: -145° / 45°'); end
+    if th3<-30 || 150<th3
+        disp('Angle 3 out of range. Proper range: -30° / 150°'); end
+    if abs(th4) > 350
+        disp('Angle 4 out of range. Proper range: ±350°'); end
+    if abs(th5) > 125
+        disp('Angle 5 out of range. Proper range: ±125°'); end
+    if abs(th6) > 350
+        disp('Angle 6 out of range. Proper range: ±350°'); end
+end
+
+th_list = [th1 th2 th3 th4 th5 th6] * pi/180;   % Convert to radians
+th_list_2 = [th1b th2b th3b th4b th5b th6b] * pi/180;
 
 % home configuration
 M = [
@@ -88,7 +117,9 @@ body_q_list = body_q_list_h(1:3, :);
 %% Part a/b: Find the FK from spatial frame using FK_space.m
 % calculate and display the spacial forward kinematics
 figure(1);
-T_sb = FK_space(M, screw_list, th_list, q_list);
+axis equal;
+T_sb = FK_space(M, screw_list, th_list, q_list, true);
+title("Space-Frame Forward Kinematics");
 if verbose
     fprintf("Space-frame forward kinematics:\n");
     disp(T_sb);
@@ -96,7 +127,8 @@ end
 
 %% Part c: Find the FK from body frame using FK_body.m
 figure(2);
-T_bs = FK_body(M, body_screw_list, th_list, body_q_list);
+T_bs = FK_body(M, body_screw_list, th_list, body_q_list, true);
+title("Body-Frame Forward Kinematics");
 if verbose
     fprintf("Body-frame forward kinematics:\n");
     disp(T_bs);
@@ -116,76 +148,130 @@ if verbose
 end
 
 %% determine if robot is in a singularity configuration
+singularity(J_s, true);       % display if robot is in singularity
+
+%% Part g: Find and plot manipulability ellipsoids
+% Linear manipulability
+figure(3);
+FK_space(M, screw_list, th_list, q_list, true);
+ellipsoid_plot_linear(J_b, T_sb);   % Textbook says use body Jacobian
+title("Linear Manipulability Ellipsoid");
+
+% Angular manipulability
+figure(4);
+FK_space(M, screw_list, th_list, q_list, true);
+ellipsoid_plot_angular(J_b, T_sb);
+title("Angular Manipulability Ellipsoid");
+
+% Isotropy
+iso = J_isotropy(J_b);
 if verbose
-    singularity(J_s);       % display if robot is in singularity
+    fprintf("Isotropy = %d\n", iso);
 end
 
+% Condition
+cond = J_condition(J_b);
+if verbose
+    fprintf("Condition = %d\n", cond);
+end
 
+% Volume
+vol = J_ellipsoid_volume(J_b);
+if verbose
+    fprintf("Volume = %d\n", vol);
+end
 
-%% Part h: Inverse Kinematics Function
-%control the robot from arbitrary configuration a to b
-T_desired = [
-    -0.4924    0.8660    0.0868    0.4696
-    0.1736   -0.0000    0.9848    0.0373
-    0.8529    0.5000   -0.1504    1.1796
-    0         0         0    1.0000];
+%% Part h/j: Find IK using numerical algorithm
+% Also includes redundancy resolution
+T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
+[thetas_d_NA, thVelList] = J_inverse_kinematics(M, body_screw_list,...
+                           th_list, body_q_list, T_s2);
+if verbose
+    fprintf("Numerical inverse kinematics:\n");
+    disp(thetas_d_NA);
+    fprintf("Optimal joint velocities:\n");
+    disp(thVelList');
+end
 
-theta_list_desired = J_inverse_kinematics(M, body_screw_list, th_list, body_q_list, T_desired);       % calculate angles to for desired end-effector position
+%% Part i: Find IK using Jacobian transpose method
+T_s2 = FK_space(M, screw_list, th_list_2, q_list, false);
+[thetas_d_JT, thetas_d_JT_array] = J_transpose_kinematics(M, body_screw_list, th_list,...
+              body_q_list, T_s2);
+if verbose
+    fprintf("Jacobian transpose inverse kinematics:\n");
+    disp(thetas_d_JT);
+end
 
+%% Test Forward Kinematics Functions
+error_count = 0;
+tol = 1e-4;
 
-% %% Test Forward Kinematics
-% % Explicit calculations
-% Ts_test = eye(4);    % Ts = exp(S1*th1) * ... = exp(Sn*thn) * M
-% Tb_test = M;         % Tb = M * exp(S1*th1) * ... * exp(Sn*thn)
-% for i = 1:length(th_list)
-%     Ts_i = expm(screw2mat(screw_list(:, i)') * th_list(i));
-%     Tb_i = expm(screw2mat(body_screw_list(:, i)') * th_list(i));
-%     Ts_test = Ts_test * Ts_i;
-%     Tb_test = Tb_test * Tb_i;
-% end
-% Ts_test = Ts_test * M;
+% Generate test outputs with MR functions
+Ts_test = FKinSpace(M, screw_list, th_list');
+Tb_test = FKinBody(M, body_screw_list, th_list');
 
-% % Compare outputs
-% error_count = 0;
-% tol = 1e-4;
+% Compare outputs
+if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
+    fprintf("Error: Spatial forward kinematics are wrong\n");
+    error_count = error_count + 1;
+end
 
+if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
+    fprintf("Error: Body forward kinematics are wrong\n");
+    error_count = error_count + 1;
+end
 
+%% Test Jacobian Functions
+J_s_test = JacobianSpace(screw_list, th_list);
+J_b_test = JacobianBody(body_screw_list, th_list);
 
-% Ts_test = FKinSpace(M, screw_list, th_list');
-% Tb_test = FKinBody(M, body_screw_list, th_list');
+% Compare outputs
+if ~all(ismembertol(J_s, J_s_test, tol), 'all')
+    fprintf("Error: Space Jacobian is wrong\n");
+    error_count = error_count + 1;
+end
 
-% % Compare outputs
-% if ~all(ismembertol(T_sb, Ts_test, tol), 'all')
-%     fprintf("Error: Spatial forward kinematics are wrong\n");
-%     error_count = error_count + 1;
-% end
+if ~all(ismembertol(J_b, J_b_test, tol), 'all')
+    fprintf("Error: Body Jacobian is wrong\n");
+    error_count = error_count + 1;
+end
 
-% if ~all(ismembertol(T_bs, Tb_test, tol), 'all')
-%     fprintf("Error: Body forward kinematics are wrong\n");
-%     error_count = error_count + 1;
-% end
+% Test space-body relation
+% J_b = Adj(T_bs) * J_s
+if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
+    fprintf("Error: Space-Body relation test failed\n");
+    error_count = error_count + 1;
+end
 
-% %% Test Jacobian Functions
-% J_s_test = JacobianSpace(screw_list, th_list);
-% J_b_test = JacobianBody(body_screw_list, th_list);
+%% Test Inverse Kinematics Functions
+% Performing FK on output of IK should yield original transformation
+% Numerical algorithm
+T_s2_test_NA = FK_space(M, screw_list, thetas_d_NA, q_list, false);
+if ~all(ismembertol(T_s2, T_s2_test_NA, tol), 'all')
+    fprintf("Error: Numerical inverse kinematics are wrong\n");
+    error_count = error_count + 1;
+end
 
-% % Compare outputs
-% if ~all(ismembertol(J_s, J_s_test, tol), 'all')
-%     fprintf("Error: Space Jacobian is wrong\n");
-%     error_count = error_count + 1;
-% end
+% Jacobian transpose algorithm
+% Needs looser error tolerance for fast resolution
+T_s2_test_JT = FK_space(M, screw_list, thetas_d_JT, q_list, false);
+if ~all(ismembertol(T_s2, T_s2_test_JT, tol*10), 'all')
+    fprintf("Error: Jacobian Transpose inverse kinematics are wrong\n");
+    error_count = error_count + 1;
+end
 
-% if ~all(ismembertol(J_b, J_b_test, tol), 'all')
-%     fprintf("Error: Body Jacobian is wrong\n");
-%     error_count = error_count + 1;
-% end
+%% Test redundancy resolution function
+% Difficult to show that these joint velocities are optimal
+% Can at least demonstrate that they all move in the right direction
+theta_diff_NA = thetas_d_NA - th_list;  % Displacement of each joint angle
+for i = 1:length(theta_diff_NA)
+    if sign(thVelList(i)) ~= sign(theta_diff_NA(i))
+        fprintf("Error: Velocity in wrong direction\n")
+        error_count = error_count + 1;
+    end
+end
 
-% % Test space-body relation
-% % J_b = Adj(T_bs) * J_s
-% if ~all(ismembertol(J_b, adj_transform(inv(T_sb)) * J_s))
-%     fprintf("Error: Space-Body relation test failed\n");
-%     error_count = error_count + 1;
-% end
+%% Display test results
+fprintf("Total errors: %d\n", error_count);
 
-% %% Display test results
-% fprintf("Total errors: %d\n", error_count);
+hold off;   % Close any open plots

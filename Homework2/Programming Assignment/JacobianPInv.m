@@ -1,7 +1,10 @@
-%% Calculate the pseudoinverse of a jacobian matrix if m~=n
-% Input:
-%   JacobianMatrix: Jacobian matrix
 function JPinv = JacobianPInv(JacobianMatrix)
+%JPINV Calculates the pseudoinverse of a jacobian matrix if m~=n
+%   Input:
+%       JacobianMatrix: Jacobian matrix
+%   Output:
+%       JPinv = pseudoinverse of JacobianMatrix
+
     % rows and columns of matrix | m: rows, n: columns
     [m, n] = size(JacobianMatrix);
     J = JacobianMatrix;
