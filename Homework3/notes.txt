@@ -23,11 +23,11 @@ Dj = position of LED marker j relative to optic tracker
 ND = number of LED markers on EM tracking base unit
 (Dj = Fd * dj)
 
-gi = position of EM marker i on EM probe
+gi = position of EM marker i on EM probe relative to probe
 Gi = position of probe EM marker i relative to EM tracker
 NG = number of EM markers on EM probe
 
-hi = position of LED marker i on optical probe
+hi = position of LED marker i on optical probe relative to probe
 Hi = position of probe LED marker i relative to optical tracker
 NH = number of LED markers on optical probe
 
