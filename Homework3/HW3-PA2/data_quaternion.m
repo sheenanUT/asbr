@@ -1,4 +1,4 @@
-function [q_Robot_config, q_camera_config,t_Robot_config,t_camera_config ]=data_quaternion()
+function [q_Robot_config, q_camera_config,t_Robot_config,t_camera_config]=data_quaternion()
 % Author: Farshid Alambeigi, Spring 2017
 
 %input: no input
