@@ -1,0 +1,53 @@
+PA3 Notes
+
+FA = transform from optical tracker to calibration object 
+NA = number of optical LED markers on calibration object
+aj = position of LED marker j in FC
+Aj = position of LED marker j relative to optic tracker
+(Aj = FA * aj)
+
+Freg = transform from EM coordinates to CT image coordinates
+bj = position of body landmark j in CT image
+Bj = position of body landmark j relative to EM tracker
+NB = number of body landmarks
+(bj = Freg * Bj)
+
+FC = calibration object coordinate system (Does FA = FC?)
+NC = number of EM markers on calibration object
+ci = position of EM marker i in FC
+Ci = position of EM marker i relative to EM tracker
+
+FD = Transform from optical tracker to EM base
+dj = position of EM base unit LED marker j relative to EM base unit
+Dj = position of LED marker j relative to optic tracker
+ND = number of LED markers on EM tracking base unit
+(Dj = Fd * dj)
+
+gi = position of EM marker i on EM probe relative to probe
+Gi = position of probe EM marker i relative to EM tracker
+NG = number of EM markers on EM probe
+
+hi = position of LED marker i on optical probe relative to probe
+Hi = position of probe LED marker i relative to optical tracker
+NH = number of LED markers on optical probe
+
+v = random noise in EM tracker data
+
+Each sample frame of calibration data contains:
+- Measurements A from 1 to NA
+- Measurements C from 1 to NC
+- Measurements D from 1 to ND
+
+Each frame from optical probe data contains:
+- Measurements D from 1 to ND
+- Measurements H from 1 to NH
+
+Each frame of EM probe data contains:
+- Measurements G from 1 to NG
+
+Calibration posts at unknown locations/orientations
+Used for pivot calibration
+
+Folder HW3-PA1 contains:
+- 7 filled-out datasets for debugging (a-g)
+- 4 unsolved datasets for grading (h-k)

@@ -1,5 +1,5 @@
 function [thetalistd, thVelList, thetalist_array] = J_inverse_kinematics(M, Blist,...
-                                   thetalist_guess, Bqlist, Tsd)
+                                   thetalist_guess, Bqlist, Tsd, use_rr)
 %J_INVERSE_KINEMATICS finds a robot's inverse kinematics using an iterative
 %numerical algorithm, and find optimal joint velocities
 %   Input:
@@ -8,6 +8,7 @@ function [thetalistd, thVelList, thetalist_array] = J_inverse_kinematics(M, Blis
 %       M: home configuration of end effector
 %       Blist: list of screws in body frame
 %       Bqlist: screw location vectors in body frame
+%       use_rr = boolean, uses redundancy resolution for IK if true
 %   Output:
 %       thetalistd: list of joint angles for end-effector to reach desired pose
 %       thVellist: list of joint angle velocities to maximize manipulability
@@ -46,9 +47,9 @@ function [thetalistd, thVelList, thetalist_array] = J_inverse_kinematics(M, Blis
     Tbs = FK_body(M, Blist, thetalist, Bqlist, false);
 
     % Algorithm fails if initial position is singular
-    if singularity(J_body(Blist, thetalist), false)
-        error("Cannot calculate IK from singular position");
-    end
+    %if singularity(J_body(Blist, thetalist), false)
+    %    error("Cannot calculate IK from singular position");
+    %end
 
     % Initial error screw
     [S_se3, th] = SE3log(inv(Tbs)*Tsd);        % screw in body frame
@@ -61,8 +62,12 @@ function [thetalistd, thVelList, thetalist_array] = J_inverse_kinematics(M, Blis
     %   Condition: loop while error condition is true and only [max] times
     while err_condition && i<max
         % set new joint angle list
-        %thetalist = thetalist + (JacobianPInv(J_body(Blist, thetalist)) * Vb)';
-        thetalist = thetalist + redundancy_resolution(Blist, thetalist, inv(Tbs) * Tsd)';
+        if use_rr
+            thetalist = thetalist + redundancy_resolution(Blist, thetalist, Tbs\Tsd)';
+        else
+            thetalist = thetalist + (JacobianPInv(J_body(Blist, thetalist)) * Vb)';
+        end
+        
         Tbs = FK_body(M, Blist, thetalist, Bqlist, false);       % find the FK in body frame
         [S_se3, th] = SE3log(inv(Tbs)*Tsd);        % screw in body frame
         Vb = se3toR6(S_se3) * th;

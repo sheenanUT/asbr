@@ -22,7 +22,7 @@ function thVelList = redundancy_resolution(Blist, thetalist, Tbd)
         error("Input Tbd is not a valid transformation matrix");
     end
 
-    difference = 1e-4;
+    difference = 1e-3;
     k0 = 1;        % kinematic constant
     q = thetalist;      % q_i
 
@@ -32,7 +32,7 @@ function thVelList = redundancy_resolution(Blist, thetalist, Tbd)
 
     % Get current manipulability
     J = J_body(Blist, q);
-    w_q = sqrt(det(J * J'));        % w(q)^i
+    w_q = sqrt(abs(det(J * J')));        % w(q)^i
 
     % Find dw/dq
     % w(q) is a scalar function of vector q
@@ -45,7 +45,7 @@ function thVelList = redundancy_resolution(Blist, thetalist, Tbd)
 
         % Get incremented manipulability
         J_next = J_body(Blist, q_next);     % J_i+1
-        w_q_next = sqrt(det(J_next * J_next'));     % w(q)^i+1
+        w_q_next = sqrt(abs(det(J_next * J_next')));     % w(q)^i+1
 
         % calculate differentiation, finite difference
         % w(q)^i+1 - w(q) / q_i+1 - q_i
