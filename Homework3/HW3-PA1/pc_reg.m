@@ -7,7 +7,7 @@ function [Tba] = pc_reg(as, bs)
 %       corresponding, ie row i of as must represent the same point as row
 %       i of bs
 %   Outputs:
-%       Tab = 4x4 transformation matrix from point set a to b
+%       Tba = 4x4 transformation matrix from point set a to b
 
 % Validate inputs
 % Check that as and bs are same size

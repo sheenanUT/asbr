@@ -63,7 +63,7 @@ for i = 'a':'k'
     folder_name = "Homework3/outputs/";
     filename_my_output = "pa1-" + debug_label + "-" + i + "-my-output1.txt";
     fileID = fopen(folder_name + filename_my_output, 'w');
-    fprintf(fileID, string(NC) + ", " + string(N_frames) + ", " + filename_my_output + "\n");
+    fprintf(fileID, string(Nc) + ", " + string(N_frames) + ", " + filename_my_output + "\n");
 
     % Skip lines for when we add pivot calibration
     fprintf(fileID, '\n\n');
