@@ -54,7 +54,7 @@ end
 M = zeros(4 * N, 4);
 for i = 1:N
     Mi = [0, (b_err(i, :) - a_err(i, :));
-          (b_err(i, :) - a_err(i, :))', v2skew(b_err(i, :) + a_err(i, :))];
+          (b_err(i, :) - a_err(i, :))', v2skew(b_err(i, :)' + a_err(i, :)')];
     M(1 + 4 * (i - 1) : 4 * i, :) = Mi;
 end
 
