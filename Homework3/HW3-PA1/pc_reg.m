@@ -26,7 +26,6 @@ b_cent = sum(bs, 1) / N;
 a_err = as - a_cent;
 b_err = bs - b_cent;
 
-%{
 % Compute H-matrix for SVD
 H = zeros(3, 3);
 for i = 1:N
@@ -43,18 +42,22 @@ end
 R = V * U';
 
 % Verify that det(R) = 1
-% If not, we need to do more work
-% Hopefully this never happens
+% Else, use alternate R
 if ~ismembertol(det(R), 1, 1e-4)
-    error("Red Alert: det(R) != 1");
+    V_prime = [V(:, 1), V(:, 2), -V(:, 3)];
+    R = V_prime * U';
+    if ~ismembertol(det(R), 1, 1e-4)
+        error("SOL");
+    end
 end
 %}
 
+%{
 % Quaternion approach
 M = zeros(4 * N, 4);
 for i = 1:N
     Mi = [0, (b_err(i, :) - a_err(i, :));
-          (b_err(i, :) - a_err(i, :))', v2skew(b_err(i, :)' + a_err(i, :)')];
+          (b_err(i, :) - a_err(i, :))', v2skew(b_err(i, :) + a_err(i, :))];
     M(1 + 4 * (i - 1) : 4 * i, :) = Mi;
 end
 
