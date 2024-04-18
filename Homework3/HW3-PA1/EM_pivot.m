@@ -9,7 +9,7 @@ function [t_g, P_dimple] = EM_pivot(filename)
         sumGj_frame1 = sumGj_frame1 + Gi_frame1;
     end
     
-    G0 = (1/size(Gi_frame1, 1)) * sumGj_frame1;       % compute local probe
+    G0 = (1/size(Gs, 1)) * sumGj_frame1;       % compute local probe
 
     % find gj for every frame
     gj = zeros(size(Gs, [1 2 3]));
@@ -27,7 +27,7 @@ function [t_g, P_dimple] = EM_pivot(filename)
     
     FG = zeros([4, 4, size(Gs, 3)]);
     for i = 1:size(Gs, 3)
-        FG(:, :, i) = pc_reg(Gs(:, :, i), gj(:, :, 1));      % find all transforms and stack them only using frame 1 for gj
+        FG(:, :, i) = pc_reg(gj(:, :, 1), Gs(:, :, i));      % find all transforms and stack them only using frame 1 for gj
     end
 
     [t_g, P_dimple] = pivot_calibration(FG);
