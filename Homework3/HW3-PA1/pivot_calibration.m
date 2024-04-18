@@ -27,6 +27,6 @@ function [b_tip, b_post] = pivot_calibration(Fk)
     A = [Rk, -Ik];
     B = -pk;
     [x, flag] = lsqr(A, B);
-    b_tip = x(1:3);
-    b_post = x(4:6);
+    b_tip = (x(1:3))';
+    b_post = (x(4:6))';
 end

@@ -41,9 +41,9 @@ end
 % Compute R
 R = V * U';
 
-% Verify that det(R) = 1
-% If not, we need to do more work
-% Hopefully this never happens
+Verify that det(R) = 1
+If not, we need to do more work
+Hopefully this never happens
 if ~ismembertol(det(R), 1, 1e-4)
     error("Red Alert: det(R) != 1");
 end

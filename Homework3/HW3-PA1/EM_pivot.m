@@ -1,4 +1,4 @@
-function EM_pivot(filename)
+function [t_g, P_dimple] = EM_pivot(filename)
     Gs = read_empivot(filename);     % all frames of G data
     Gj_frame1 = Gs(:, :, 1);     % first frame of Gs
 
@@ -12,8 +12,8 @@ function EM_pivot(filename)
     G0 = (1/size(Gi_frame1, 1)) * sumGj_frame1;       % compute local probe
 
     % find gj for every frame
-    gj = zeros(size(Gs, [1 2]));
-    for i = 1:1
+    gj = zeros(size(Gs, [1 2 3]));
+    for i = 1:size(Gs, 3)
         % generate current frame of gj
         gj_framei=zeros(size(Gs, [1 2]));
         Gj_framei = Gs(:, :, i);       % current frame of Gj
@@ -24,12 +24,11 @@ function EM_pivot(filename)
         end
         gj(:, :, i) = gj_framei;        % set current frame of gj
     end
-    gj = gj(:, :, 1);        % only first frame
     
+    FG = zeros([4, 4, size(Gs, 3)]);
     for i = 1:size(Gs, 3)
-        i
-        Gs(:, :, i)
-        gj
-        FG_k = pc_reg(Gs(:, :, i), gj)      % find transform of current Gj frame and gj
+        FG(:, :, i) = pc_reg(Gs(:, :, i), gj(:, :, 1));      % find all transforms and stack them only using frame 1 for gj
     end
+
+    [t_g, P_dimple] = pivot_calibration(FG);
 end
