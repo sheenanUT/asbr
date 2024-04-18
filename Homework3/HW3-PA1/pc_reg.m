@@ -1,4 +1,4 @@
-function [Tab] = pc_reg(as, bs)
+function [Tba] = pc_reg(as, bs)
 %PC_REG This function computes the transform between 2 sets of 3D points
 %(point cloud registration)
 %   Inputs:
@@ -36,7 +36,7 @@ for i = 1:N
 end
 
 % Singular value decomposition
-[U, ~, V] = svd(H);
+[U, S, V] = svd(H);
 
 % Compute R
 R = V * U';
@@ -47,11 +47,39 @@ R = V * U';
 if ~ismembertol(det(R), 1, 1e-4)
     error("Red Alert: det(R) != 1");
 end
+%}
+
+%{
+% Quaternion approach
+M = zeros(4 * N, 4);
+for i = 1:N
+    Mi = [0, (b_err(i, :) - a_err(i, :));
+          (b_err(i, :) - a_err(i, :))', v2skew(b_err(i, :) + a_err(i, :))];
+    M(1 + 4 * (i - 1) : 4 * i, :) = Mi;
+end
+
+% SVD of M to get q
+[~, ~, V] = svd(M);
+q = V(:, 4);
+
+% Quaternion to R
+R = quat2r(q');
+%}
 
 % Calculate p
 p = b_cent' - R * a_cent';
 
 % Return transform T = (R, p)
-Tab = [R, p; [0 0 0 1]];
+Tba = [R, p; [0 0 0 1]];
+
+% Validate outputs
+% Tba * a = b
+as_homo = [as'; ones(1, N)];
+bs_homo = Tba * as_homo;
+bs_test = bs_homo(1:3, :)';
+err = bs - bs_test;
+avg_err = mean(abs(err), "all");
+max_err = max(abs(err), [], "all");
+err_v = [avg_err; max_err];
 
 end
