@@ -7,7 +7,7 @@ function [Cs, post_EM, post_opt] = read_output(filename)
 %            marker on the calibration object in the EM base unit frame and each
 %            page is a different frame of data
 %       post_EM = 1 x 3 vector representing expected position of EM post
-%       post_Opt = 1 x 3 vector representing expected position of optical
+%       post_opt = 1 x 3 vector representing expected position of optical
 %                  post
 
 % Assume the input file has the correct format
