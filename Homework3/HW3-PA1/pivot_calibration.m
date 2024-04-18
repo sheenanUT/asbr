@@ -1,4 +1,13 @@
 function [b_tip, b_post] = pivot_calibration(Fk)
+% PIVOT_CALIBRATION finds the translation vectors b_tip and b_post
+% from Fk
+%     Input:
+%         Fk: 4 x 4 x Nframes matrix where each page is the transform
+%         from the tracker to the probe
+%     Outputs:
+%         b_tip: translation vector of the tip from the probe
+%         b_post: translation vector of the pivot from the tracker
+
     Rk = [];
     pk = [];
     Ik = [];
