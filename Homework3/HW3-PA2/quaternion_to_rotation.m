@@ -1,3 +1,9 @@
+% ROTATIONMATRIX converts the quaternion representation of a rotation to a rotation matrix
+%     Input:
+%         quaternion: 1x4 quaternion representation of a rotation
+%     Output:
+%         rotationMatrix: 3x3 rotation matrix
+
 function rotationMatrix = quaternion_to_rotation(quaternion)
     % split quaternion into elements
     q0 = quaternion(1);
