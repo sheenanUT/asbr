@@ -18,8 +18,9 @@ for i = 'a':'k'
     else
         debug_label = 'unknown';
     end
-    filename_body = ['pa1-', debug_label, '-', i, '-calbody.txt'];
-    filename_readings = ['pa1-', debug_label, '-', i, '-calreadings.txt'];
+    filename_body = "pa1-" + debug_label + "-" + i + "-calbody.txt";
+    filename_readings = "pa1-" + debug_label + "-" + i + "-calreadings.txt";
+    filename_empivot = "pa1-" + debug_label + "-" + i + "-empivot.txt";
 
     % Read data from files
     [ds, as, cs] = read_calbody(filename_body);
@@ -49,14 +50,19 @@ for i = 'a':'k'
         Cs(:, :, j) = Cs_j;
     end
 
+    % Pivot calibration for EM probe
+    [~, P_dimple_EM] = EM_pivot(filename_empivot);
+
     % Check with debug data if available
     if isequal(debug_label, 'debug')
         filename_output = ['pa1-debug-', i, '-output1.txt'];
-        Cs_debug = read_output(filename_output);
-        err = abs(Cs - Cs_debug);
+        [Cs_debug, EM_debug, opt_debug] = read_output(filename_output);
+        Cs_err = abs(Cs - Cs_debug);
+        EM_err = abs(P_dimple_EM - EM_debug);
         fprintf("Dataset " + i + ":\n" + ...
-            "Average error = " + string(mean(err, "all")) + "\n" + ...
-            "Max error = " + string(max(err, [], "all")) + "\n");
+            "Average error = " + string(mean(Cs_err, "all")) + "\n" + ...
+            "Max error = " + string(max(Cs_err, [], "all")) + "\n" + ...
+            "EM pivot error = " + string(mean(EM_err, "all")) + "\n");
     end
 
     % Write output to file
@@ -65,8 +71,11 @@ for i = 'a':'k'
     fileID = fopen(folder_name + filename_my_output, 'w');
     fprintf(fileID, string(Nc) + ", " + string(N_frames) + ", " + filename_my_output + "\n");
 
-    % Skip lines for when we add pivot calibration
-    fprintf(fileID, '\n\n');
+    % Write pivot calibration results
+    fprintf(fileID, "%8.2f, %8.2f, %8.2f\n", P_dimple_EM);
+
+    % Skip line for when we add opt pivot calibration
+    fprintf(fileID, '\n');
 
     % Write Cs to file
     for j = 1:N_frames
