@@ -47,7 +47,7 @@ function [t_g, P_dimple] = opt_pivot(filename_opt, filename_body)
     
     FH = zeros([4, 4, size(Hs, 3)]);
     for i = 1:size(Hs, 3)
-        FH(:, :, i) = pc_reg(Hs(:, :, i), hj(:, :, 1));      % find all transforms and stack them only using frame 1 for gj
+        FH(:, :, i) = pc_reg(hj(:, :, 1), Hs(:, :, i));      % find all transforms and stack them only using frame 1 for gj
     end
 
     [t_g, P_dimple] = pivot_calibration(FH);

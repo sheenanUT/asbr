@@ -21,6 +21,7 @@ for i = 'a':'k'
     filename_body = "pa1-" + debug_label + "-" + i + "-calbody.txt";
     filename_readings = "pa1-" + debug_label + "-" + i + "-calreadings.txt";
     filename_empivot = "pa1-" + debug_label + "-" + i + "-empivot.txt";
+    filename_optpivot = "pa1-" + debug_label + "-" + i + "-optpivot.txt";
 
     % Read data from files
     [ds, as, cs] = read_calbody(filename_body);
@@ -53,16 +54,21 @@ for i = 'a':'k'
     % Pivot calibration for EM probe
     [~, P_dimple_EM] = EM_pivot(filename_empivot);
 
+    % Pivot calibration for optical probe
+    [~, P_dimple_opt] = opt_pivot(filename_optpivot, filename_body);
+
     % Check with debug data if available
     if isequal(debug_label, 'debug')
         filename_output = ['pa1-debug-', i, '-output1.txt'];
         [Cs_debug, EM_debug, opt_debug] = read_output(filename_output);
         Cs_err = abs(Cs - Cs_debug);
         EM_err = abs(P_dimple_EM - EM_debug);
+        opt_err = abs(P_dimple_opt - opt_debug);
         fprintf("Dataset " + i + ":\n" + ...
-            "Average error = " + string(mean(Cs_err, "all")) + "\n" + ...
-            "Max error = " + string(max(Cs_err, [], "all")) + "\n" + ...
-            "EM pivot error = " + string(mean(EM_err, "all")) + "\n");
+            "Calibration error = " + string(mean(Cs_err, "all")) + "\n" + ...
+            "EM pivot error = " + string(mean(EM_err, "all")) + "\n" + ...
+            "Optical pivot error = " + string(mean(opt_err, "all")) + "\n" + ...
+            "\n");
     end
 
     % Write output to file
@@ -73,9 +79,7 @@ for i = 'a':'k'
 
     % Write pivot calibration results
     fprintf(fileID, "%8.2f, %8.2f, %8.2f\n", P_dimple_EM);
-
-    % Skip line for when we add opt pivot calibration
-    fprintf(fileID, '\n');
+    fprintf(fileID, "%8.2f, %8.2f, %8.2f\n", P_dimple_opt);
 
     % Write Cs to file
     for j = 1:N_frames
