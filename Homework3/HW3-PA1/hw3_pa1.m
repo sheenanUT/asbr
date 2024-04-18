@@ -60,7 +60,7 @@ for i = 'a':'k'
     end
 
     % Write output to file
-    folder_name = "Homework3/outputs/";
+    folder_name = "Homework3/outputs/"; % Change this if needed
     filename_my_output = "pa1-" + debug_label + "-" + i + "-my-output1.txt";
     fileID = fopen(folder_name + filename_my_output, 'w');
     fprintf(fileID, string(Nc) + ", " + string(N_frames) + ", " + filename_my_output + "\n");
@@ -70,7 +70,7 @@ for i = 'a':'k'
 
     % Write Cs to file
     for j = 1:N_frames
-        for k = 1:NC
+        for k = 1:Nc
             fprintf(fileID, "%8.2f, %8.2f, %8.2f\n", Cs(k, :, j));
         end
     end

@@ -42,10 +42,13 @@ end
 R = V * U';
 
 % Verify that det(R) = 1
-% If not, we need to do more work
-% Hopefully this never happens
+% Else, use alternate R
 if ~ismembertol(det(R), 1, 1e-4)
-    error("Red Alert: det(R) != 1");
+    V_prime = [V(:, 1), V(:, 2), -V(:, 3)];
+    R = V_prime * U';
+    if ~ismembertol(det(R), 1, 1e-4)
+        error("SOL");
+    end
 end
 %}
 
@@ -74,12 +77,12 @@ Tba = [R, p; [0 0 0 1]];
 
 % Validate outputs
 % Tba * a = b
-as_homo = [as'; ones(1, N)];
-bs_homo = Tba * as_homo;
-bs_test = bs_homo(1:3, :)';
-err = bs - bs_test;
-avg_err = mean(abs(err), "all");
-max_err = max(abs(err), [], "all");
-err_v = [avg_err; max_err];
+% as_homo = [as'; ones(1, N)];
+% bs_homo = Tba * as_homo;
+% bs_test = bs_homo(1:3, :)';
+% err = bs - bs_test;
+% avg_err = mean(abs(err), "all");
+% max_err = max(abs(err), [], "all");
+% err_v = [avg_err; max_err];
 
 end
