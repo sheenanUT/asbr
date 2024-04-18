@@ -1,6 +1,6 @@
 function EM_pivot(filename)
     Gs = read_empivot(filename);     % all frames of G data
-    Gj_frame1 = Gs(:, :, 1);     % first frame of Gs
+    Gj_frame1 = Gs(:, :, 3);     % first frame of Gs
 
     % find sum of Gj_1
     sumGj_frame1 = zeros(1, size(Gj_frame1, 2));
@@ -12,8 +12,8 @@ function EM_pivot(filename)
     G0 = (1/size(Gi_frame1, 1)) * sumGj_frame1;       % compute local probe
 
     % find gj for every frame
-    gj = zeros(size(Gs))
-    for i = 1:size(Gs, 3)
+    gj = zeros(size(Gs, [1 2]));
+    for i = 1:1
         % generate current frame of gj
         gj_framei=zeros(size(Gs, [1 2]));
         Gj_framei = Gs(:, :, i);       % current frame of Gj
@@ -24,23 +24,5 @@ function EM_pivot(filename)
         end
         gj(:, :, i) = gj_framei;        % set current frame of gj
     end
-
     
-    %% compute local probe
-    % % find sum of Gj
-    % sumGj = zeros(size(Gj, [1 2]));     % initialize as zero matrix
-    % for i = 1:size(Gj, 3);
-    %     Gi = Gj(:,:,i);     % current frame of G
-
-    %     sumGj = sumGj + Gi;     % add current frame of G
-    % end
-    % G0 = (1/size(Gj, 3)) * sumGj;       % compute local probe
-
-    % % translate observations relative to midpoint
-    % gj = zeros(size(Gj, 1), 3, size(Gj, 3));
-    % for i = 1:size(Gj, 3);
-    %     Gi = Gj(:,:,i);     % current frame of G
-
-    %     gj(:, :, i) = Gi-G0;
-    % end
 end
