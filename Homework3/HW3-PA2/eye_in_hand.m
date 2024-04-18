@@ -10,6 +10,7 @@
 function X = eye_in_hand(q_data_A, q_data_B, t_data_A, t_data_B)
     
     %% find Rx
+    M = [];
     for i = 1:size(q_data_A, 1)
         % scalar component of quaternion
         scalarA = q_data_A(i, 1);
