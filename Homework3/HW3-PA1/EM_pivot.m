@@ -1,4 +1,12 @@
 function [t_g, P_dimple] = EM_pivot(filename)
+% EM_PIVOT finds the translation vectors t_g and P_dimple from the "empivot" files
+%     Inputs:
+%         filename: string, name of the empivot file to read
+%     Outputs:
+%         t_g: 1x3 vector, position of the tip relative to the probe
+%         P_dimple: 1x3 vector, position of the dimple on the pivot relative to the
+%         electromagnetic tracker
+
     Gs = read_empivot(filename);     % all frames of G data
     Gj_frame1 = Gs(:, :, 1);     % first frame of Gs
 

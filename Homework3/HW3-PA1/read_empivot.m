@@ -1,6 +1,6 @@
 function [Gs] = read_empivot(filename)
-%READ_EMPIVOT This function reads the data on the EM probe from a "empivot"
-%file
+% READ_EMPIVOT This function reads the data on the EM probe from a "empivot"
+% file
 %   Inputs:
 %       filename = string, name of empivot file to read
 %   Outputs:

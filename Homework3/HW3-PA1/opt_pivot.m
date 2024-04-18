@@ -1,4 +1,12 @@
 function [t_g, P_dimple] = opt_pivot(filename_opt, filename_body)
+% OPT_PIVOT finds the translation vectors t_g and P_dimple from the "optpivot" files
+%     Inputs:
+%         filename_opt: string, name of the optpivot file to read
+%         filename_body: string, name of the calbody file to read
+%     Outputs:
+%         t_g: 1x3 vector, position of the tip relative to the probe
+%         P_dimple: 1x3 vector, position of the dimple on the pivot relative to the optical tracker
+
     [Ds, Hopt] = read_optpivot(filename_opt);     % all frames of G data
     [ds, ~, ~] = read_calbody(filename_body);
 
