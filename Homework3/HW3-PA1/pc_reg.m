@@ -26,6 +26,7 @@ b_cent = sum(bs, 1) / N;
 a_err = as - a_cent;
 b_err = bs - b_cent;
 
+%{
 % Compute H-matrix for SVD
 H = zeros(3, 3);
 for i = 1:N
@@ -47,6 +48,22 @@ R = V * U';
 if ~ismembertol(det(R), 1, 1e-4)
     error("Red Alert: det(R) != 1");
 end
+%}
+
+% Quaternion approach
+M = zeros(4 * N, 4);
+for i = 1:N
+    Mi = [0, (b_err(i, :) - a_err(i, :));
+          (b_err(i, :) - a_err(i, :))', v2skew(b_err(i, :) + a_err(i, :))];
+    M(1 + 4 * (i - 1) : 4 * i, :) = Mi;
+end
+
+% SVD of M to get q
+[~, ~, V] = svd(M);
+q = V(:, 4);
+
+% Quaternion to R
+R = quat2r(q');
 %}
 
 % Calculate p
