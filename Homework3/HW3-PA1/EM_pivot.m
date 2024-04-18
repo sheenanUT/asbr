@@ -1,6 +1,6 @@
 function EM_pivot(filename)
     Gs = read_empivot(filename);     % all frames of G data
-    Gj_frame1 = Gs(:, :, 3);     % first frame of Gs
+    Gj_frame1 = Gs(:, :, 1);     % first frame of Gs
 
     % find sum of Gj_1
     sumGj_frame1 = zeros(1, size(Gj_frame1, 2));
@@ -24,5 +24,12 @@ function EM_pivot(filename)
         end
         gj(:, :, i) = gj_framei;        % set current frame of gj
     end
+    gj = gj(:, :, 1);        % only first frame
     
+    for i = 1:size(Gs, 3)
+        i
+        Gs(:, :, i)
+        gj
+        FG_k = pc_reg(Gs(:, :, i), gj)      % find transform of current Gj frame and gj
+    end
 end
