@@ -40,5 +40,4 @@ function qd = q_desired_b(Tsb, J, p_tip, p_goal)
 
     % perform least sqaure problem with lower bound and upper bound
     [qd, flag] = lsqlin(C, d, A, b, [], [], lower_bound, upper_bound);
-    print();
 end
