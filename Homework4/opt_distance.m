@@ -28,6 +28,6 @@ Je = J(4:6, :);
 
 % Rearrange distance formula into Ax = b form
 A = -v2skew(t) * Ja + Je;
-b = p_goal + t;
+b = p_goal - t;
 
 end
