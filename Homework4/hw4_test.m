@@ -124,9 +124,10 @@ plot_vector([0 0 0], t(1:3)', '-k*');
 plot_vector([0 0 0], p_goal', '-bo');
 hold off;
 
-% For each point on circle, move to that point in sequence
-
-Ds = zeros([length(ps_goal), 1]);
+%% For each point on circle, move to that point in sequence
+Ds_a = zeros([length(ps_goal), 1]);  % Distance from tool tip to goal
+wobbles_a = zeros([length(ps_goal), 1]);  % Change in tool orientation
+th_list = [th1 th2 th3 th4 th5 th6] * pi/180;
 for i = 2:length(ps_goal)
     % Get goal position
     p_goal = ps_goal(i, :)';
@@ -137,12 +138,63 @@ for i = 2:length(ps_goal)
     % Get optimal joint displacements
     delta_q = q_desired_a(T_sb, J, p_tip, p_goal, th_list);
 
+    % Get change in orientation
+    wobble = norm(cross((J(1:3, :) * delta_q), T_sb(1:3, 1:3) * [0; 0; 1]));
+    wobbles_a(i) = wobble;
+
     % Increment joint angles
     th_list = th_list + delta_q';
 
     % Get and plot new FK
     %  figure;
-    hold on;
+    %hold on;
+    T_sb = FK_space(M, screw_list, th_list, q_list, false);
+    % t = T_sb * [p_tip; 1];
+    % plot_vector(t(1:3)' - T_sb(1:3, 4)', T_sb(1:3, 4)', '-k');
+    % plot_vector([0 0 0], t(1:3)', '-k*');
+    % plot_vector([0 0 0], p_goal', '-bo');
+    %hold off;
+
+    % Get current distance
+    D = norm(p_goal - T_sb(1:3, 4));
+    Ds_a(i) = D;
+
+    
+end
+
+figure;
+plot(1:length(Ds_a), Ds_a * 1000);
+title("Distance from Target with Distance Control (mm)")
+ylabel("Distance (mm)");
+
+figure;
+plot(1:length(wobbles_a), wobbles_a);
+title("Change in Orientation with Distance Control")
+
+%% Repeat with orientation optimization
+Ds_b = zeros([length(ps_goal), 1]);
+wobbles_b = zeros([length(ps_goal), 1]);
+th_list = [th1 th2 th3 th4 th5 th6] * pi/180;
+for i = 2:length(ps_goal)
+    % Get goal position
+    p_goal = ps_goal(i, :)';
+
+    % Get current Jacobian
+    J = J_space(screw_list, th_list);
+
+    % Get optimal joint displacements
+    delta_q = q_desired_b(T_sb, J, p_tip, p_goal, th_list);
+
+    % Get change in orientation
+    wobble = norm(cross((J(1:3, :) * delta_q), T_sb(1:3, 1:3) * [1; 0; 0]));
+    wobbles_b(i) = wobble;
+
+    % Increment joint angles
+    th_list = th_list + delta_q';
+
+    % Get and plot new FK
+    %  figure;
+    %hold on;
     T_sb = FK_space(M, screw_list, th_list, q_list, false);
     % t = T_sb * [p_tip; 1];
     % plot_vector(t(1:3)' - T_sb(1:3, 4)', T_sb(1:3, 4)', '-k');
@@ -152,9 +204,14 @@ for i = 2:length(ps_goal)
 
     % Get current distance
     D = norm(p_goal - T_sb(1:3, 4));
-    Ds(i) = D;
-    hold off;
+    Ds_b(i) = D;
 end
 
-plot(1:length(Ds), Ds' * 1000);
-title("Distance from Target (mm)")
+figure;
+plot(1:length(Ds_a), Ds_a' * 1000);
+title("Distance from Target with Distance & Orientation Control");
+ylabel("Distance (mm)");
+
+figure;
+plot(1:length(wobbles_a), wobbles_a);
+title("Change in Orientation with Distance & Orientation Control")
